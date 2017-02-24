@@ -13,6 +13,8 @@ wget --no-check-cert -c ${url_of_stage_file} -O stage.tar.xz || exit
 mkdir -p rootfs
 mkdir -p out
 if [ -e rootfs/* ]; then
+# DO NOTHING!
+else
 tar -xf stage.tar.xz -C rootfs || exit
 fi
 cd rootfs
