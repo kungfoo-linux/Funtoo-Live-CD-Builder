@@ -32,6 +32,10 @@ chroot . rm -rf /usr/src/* || exit 1
 chroot . rm -rf /boot || exit 1
 chroot . mkdir -p /usr/src/linux || exit 1
 chroot . mkdir -p /boot || exit 1
+echo "
+Please provide a 'root' password:
+"
+chroot . passwd root || exit 1
 cd ..
 cp -raf /usr/src/linux/* rootfs/usr/src/linux || exit 1
 cp -raf `readlink -f /vmlinuz` rootfs/boot/vmlinuz || exit 1
