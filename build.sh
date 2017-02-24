@@ -32,6 +32,8 @@ chroot . rm -rf /usr/src/* || exit 1
 chroot . rm -rf /boot || exit 1
 chroot . mkdir -p /usr/src/linux || exit 1
 chroot . mkdir -p /boot || exit 1
+chroot . rm -rf /lib/modules/* || exit 1
+chroot . rm -rf /lib64/modules/* || exit 1
 echo "
 Please provide a 'root' password:
 "
@@ -43,6 +45,7 @@ cp -raf /lib/modules/`uname -r` rootfs/lib/modules/`uname -r` || exit 1
 cp -raf stage/* rootfs || exit 1
 cd rootfs
 chroot . /tmp/linx-live/build || exit 1
+umount -f dev proc sys || exit 1
 cd ..
 mv -f rootfs/*.iso rootfs/*.zip out || exit 1
 clear
