@@ -12,7 +12,9 @@ esac
 wget --no-check-cert -c ${url_of_stage_file} -O stage.tar.xz || exit
 mkdir -p rootfs
 mkdir -p out
+if [ -e rootfs/* ]; then
 tar -xf stage.tar.xz -C rootfs || exit
+fi
 cd rootfs
 mkdir -p dev sys proc
 mount --bind /dev dev || {umount -f dev proc sys; exit}
