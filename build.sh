@@ -23,6 +23,7 @@ build_() {
 case `uname -m` in
 i[3-6]86) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-32bit/generic_32/stage3-latest.tar.xz ;;
 x86_64) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-64bit/generic_64/stage3-latest.tar.xz ;;
+*) echo "ERROR: Architecture `uname -m` is'nt supported!"
 esac
 
 if tar -xvf stage.tar.xz -C rootfs; then
