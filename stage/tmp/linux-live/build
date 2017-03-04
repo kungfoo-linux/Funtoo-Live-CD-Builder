@@ -59,13 +59,15 @@ fi
 
 ARCH=$(uname -m)
 
-mkisofs -o "/$LIVEKITNAME-$ARCH-`date +"%m-%d-%Y"`.iso" -v -J -R -D -A "$LIVEKITNAME" -V "$LIVEKITNAME" -no-emul-boot -boot-info-table -boot-load-size 4 -b "$LIVEKITNAME"/boot/isolinux.bin -c "$LIVEKITNAME"/boot/isolinux.boot . >/dev/null 2>/dev/null
+timedate=`date +"%m-%d-%Y"`
+
+mkisofs -o "/$LIVEKITNAME-$ARCH-${timedate}.iso" -v -J -R -D -A "$LIVEKITNAME" -V "$LIVEKITNAME" -no-emul-boot -boot-info-table -boot-load-size 4 -b "$LIVEKITNAME"/boot/isolinux.bin -c "$LIVEKITNAME"/boot/isolinux.boot . >/dev/null 2>/dev/null
 
 cat "$CWD/bootinfo.txt" | fgrep -v "#" | sed -r "s/mylinux/$LIVEKITNAME/" | sed -r "s/\$/
 /" > readme.txt
 echo "Creating ZIP for USB boot..."
 rm -f "/$LIVEKITNAME-$ARCH-*.zip"
-zip -0 -r "/$LIVEKITNAME-$ARCH-`date +"%m-%d-%Y"`.zip" *
+zip -0 -r "/$LIVEKITNAME-$ARCH-${timedate}.zip" *
 
 cd ..
 rm -Rf "$LIVEKITDATA"
