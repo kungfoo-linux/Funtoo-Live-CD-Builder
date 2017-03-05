@@ -26,17 +26,15 @@ x86_64) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-64bi
 *) die "Architecture `uname -m` is'nt supported!" ;;
 esac
 
-mkdir -p rootfs
-if [ -e rootfs/* ]; then
-	echo
+if [ ! -d rootfs ]; then
+	mkdir -p rootfs
+	tar -xvf stage.tar.xz -C rootfs
 else
-	if tar -xvf stage.tar.xz -C rootfs; then
-		echo
-	else
-		wget --no-check-cert -c ${url_of_stage_file} -O stage.tar.xz
-		tar -xvf stage.tar.xz -C rootfs
-	fi
+	wget --no-check-cert -c ${url_of_stage_file} -O stage.tar.xz
+	mkdir -p rootfs
+	tar -xvf stage.tar.xz -C rootfs
 fi
+
 mkdir -p out
 mkdir -p stamps
 cd rootfs
@@ -59,62 +57,62 @@ fi
 
 cp `readlink -f /etc/resolv.conf` etc
 
-if [ -e stamps/01 ]; then
+if [ -e 'stamps/01' ]; then
 	echo
 else
 	(
-	touch stamps/01
+	> 'stamps/01'
 	chroot . emerge --sync
-	) || die "Can't sync the portage" 01
+	) || die "Can't sync the portage" '01'
 fi
 
-if [ -e stamps/02 ]; then
+if [ -e 'stamps/02' ]; then
 	echo
 else
 	(
-	touch stamps/02
+	> 'stamps/02'
 	chroot . epro mix-ins +xfce
-	) || die "Can'r setup mix-ins!" 02
+	) || die "Can'r setup mix-ins!" '02'
 fi
 
-if [ -e stamps/03 ]; then
+if [ -e 'stamps/03' ]; then
 	echo
 else
 	(
-	touch stamps/03
+	> 'stamps/03'
 	chroot . echo "exec startxfce4 --with-ck-launch" > ~/.xinitrc
-	) || die "Can't setup xinitrd!" 03
+	) || die "Can't setup xinitrd!" '03'
 fi
 
-if [ -e stamps/04 ]; then
+if [ -e 'stamps/04' ]; then
 	echo
 else
 	(
-	touch stamps/04
-	chroot . emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask --ask n
+	> 'stamps/04'
+	chroot . emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask-write --ask n
 	#	Now we must repeat above command for some reasons to 'autounmask' masked packages :)
 	chroot . emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --ask n
-	) || die "Can't emerge default packages!" 04
+	) || die "Can't emerge default packages!" '04'
 fi
 
-if [ -e stamps/05 ]; then
+if [ -e 'stamps/05' ]; then
 	echo
 else
 	(
-	touch stamps/05
+	> 'stamps/05'
 	chroot . rc-update add consolekit default
 	chroot . rc-update add dhcpcd default
 	chroot . echo "DISPLAYMANAGER='lightdm'" > /etc/conf.d/xdm
 	chroot . rc-update add xdm default
 	chroot . rc-update add dbus default
-	) || die "Can't setup rc-update!" 05
+	) || die "Can't setup rc-update!" '05'
 fi
 
-if [ -e stamps/06 ]; then
+if [ -e 'stamps/06' ]; then
 	echo
 else
 	(
-	touch stamps/06
+	> 'stamps/06'
 	chroot . rm -rf /usr/src/*
 	chroot . rm -rf /boot
 	chroot . mkdir -p /usr/src/linux
@@ -135,19 +133,19 @@ else
 	fi
 	cp -raf stage/* rootfs
 	cd rootfs
-	) || die "Can't setup directories!" 06
+	) || die "Can't setup directories!" '06'
 fi
 
-if [ -e stamps/07 ]; then
+if [ -e 'stamps/07' ]; then
 	echo
 else
 	(
-	touch stamps/07
+	> 'stamps/07'
 	echo "
 Please provide a 'root' password:
 	"
 	chroot . passwd root
-	) || die "Can't setup password for root!" 07
+	) || die "Can't setup password for root!" '07'
 fi
 
 if chroot . /tmp/linx-live/build; then
