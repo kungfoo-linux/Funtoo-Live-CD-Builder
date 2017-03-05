@@ -131,16 +131,16 @@ else
 	) || die "Can't setup directories!" 06
 fi
 
-if [ -e stamps/06 ]; then
+if [ -e stamps/07 ]; then
 	echo
 else
 	(
-	touch stamps/06
+	touch stamps/07
 	echo "
 Please provide a 'root' password:
 	"
 	chroot . passwd root
-	) || die "Can't setup password for root!" 06
+	) || die "Can't setup password for root!" 07
 fi
 
 if chroot . /tmp/linx-live/build; then
@@ -149,7 +149,8 @@ if chroot . /tmp/linx-live/build; then
 	mv -f rootfs/*.iso rootfs/*.zip out
 	clear
 	echo "
-ALL GOOD FIND IMAGES IN `pwd`/out DIR :)
+ALL GOOD!
+FIND IMAGES IN `pwd`/out DIR :)
 	"
 	ls out | sort
 else
