@@ -27,11 +27,15 @@ x86_64) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-64bi
 esac
 
 mkdir -p rootfs
-if tar -xvf stage.tar.xz -C rootfs; then
+if [ -e rootfs/* ]; then
 	echo
 else
-	wget --no-check-cert -c ${url_of_stage_file} -O stage.tar.xz
-	tar -xvf stage.tar.xz -C rootfs
+	if tar -xvf stage.tar.xz -C rootfs; then
+		echo
+	else
+		wget --no-check-cert -c ${url_of_stage_file} -O stage.tar.xz
+		tar -xvf stage.tar.xz -C rootfs
+	fi
 fi
 mkdir -p out
 mkdir -p stamps
