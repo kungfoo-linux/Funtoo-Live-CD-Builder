@@ -26,13 +26,20 @@ x86_64) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-64bi
 *) die "Architecture `uname -m` is'nt supported!" ;;
 esac
 
-if [ ! -d rootfs ]; then
-	mkdir -p rootfs
-	tar -xvf stage.tar.xz -C rootfs
+if [ -e 'stamps/00' ]; then
+	echo
 else
-	wget --no-check-cert -c ${url_of_stage_file} -O stage.tar.xz
-	mkdir -p rootfs
-	tar -xvf stage.tar.xz -C rootfs
+	(
+	> 'stamps/00'
+	if [ ! -d rootfs ]; then
+		mkdir -p rootfs
+		tar -xvf stage.tar.xz -C rootfs
+	else
+		wget --no-check-cert -c ${url_of_stage_file} -O stage.tar.xz
+		mkdir -p rootfs
+		tar -xvf stage.tar.xz -C rootfs
+	fi
+	) || die "Can't download ${url_of_stage_file} and extract!" '00'
 fi
 
 mkdir -p out
