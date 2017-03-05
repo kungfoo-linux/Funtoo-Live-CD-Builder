@@ -100,8 +100,8 @@ fi
 if [ -e stamps/05 ]; then
 	echo
 else
-	touch stamps/05
 	(
+	touch stamps/05
 	chroot . rc-update add consolekit default
 	chroot . rc-update add dhcpcd default
 	chroot . echo "DISPLAYMANAGER='lightdm'" > /etc/conf.d/xdm
@@ -113,8 +113,8 @@ fi
 if [ -e stamps/06 ]; then
 	echo
 else
-	touch stamps/06
 	(
+	touch stamps/06
 	chroot . rm -rf /usr/src/*
 	chroot . rm -rf /boot
 	chroot . mkdir -p /usr/src/linux
@@ -134,8 +134,8 @@ fi
 if [ -e stamps/06 ]; then
 	echo
 else
-	touch stamps/06
 	(
+	touch stamps/06
 	echo "
 Please provide a 'root' password:
 	"
@@ -160,7 +160,7 @@ fi
 
 case $1 in
 build)	build_ && exit ;;
-clean)	rm -rf rootfs out stage.tar.xz && exit ;;
+clean)	rm -rf rootfs out stage.tar.xz stamps && exit ;;
 *)		clear && echo "
 Only use $0 <build|clean>!
 " && exit ;;
