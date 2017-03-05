@@ -26,6 +26,7 @@ x86_64) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-64bi
 *) echo "ERROR: Architecture `uname -m` is'nt supported!" ; exit ;;
 esac
 
+mkdir -p rootfs
 if tar -xvf stage.tar.xz -C rootfs; then
 	echo
 else
