@@ -23,7 +23,7 @@ build_() {
 case `uname -m` in
 i[3-6]86) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-32bit/generic_32/stage3-latest.tar.xz ;;
 x86_64) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-64bit/generic_64/stage3-latest.tar.xz ;;
-*) echo "ERROR: Architecture `uname -m` is'nt supported!" ; exit ;;
+*) die "Architecture `uname -m` is'nt supported!" ;;
 esac
 
 mkdir -p rootfs
@@ -57,7 +57,7 @@ else
 	die "Can't bind /proc to `pwd`/proc!"
 fi
 
-cp /etc/resolv.conf etc
+cp `readlink -f /etc/resolv.conf` etc
 
 if [ -e stamps/01 ]; then
 	echo
