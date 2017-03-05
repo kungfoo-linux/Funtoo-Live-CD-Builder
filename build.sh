@@ -125,7 +125,14 @@ else
 	cd ..
 	cp -raf /usr/src/linux/* rootfs/usr/src/linux
 	cp -raf `readlink -f /vmlinuz` rootfs/boot/vmlinuz
-	cp -raf /lib/modules/`uname -r` rootfs/lib/modules/`uname -r`
+	if [ -e /lib64/modules/* ]; then
+		cp -raf /lib64/modules/`uname -r` rootfs/lib64/modules/`uname -r`
+		if [ -e /lib/modules/* ]; then
+			cp -raf /lib/modules/`uname -r` rootfs/lib/modules/`uname -r`
+		fi
+	else
+		die "Can't find kernel modules for release `uname -r`!"
+	fi
 	cp -raf stage/* rootfs
 	cd rootfs
 	) || die "Can't setup directories!" 06
