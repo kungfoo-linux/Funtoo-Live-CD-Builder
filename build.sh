@@ -26,20 +26,23 @@ x86_64) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-64bi
 *) die "Architecture `uname -m` is'nt supported!" ;;
 esac
 
-if [ -e 'stamps/00' ]; then
+if [ -e '`pwd`/stamps/00' ]; then
 	echo
 else
-	(
-	> 'stamps/00'
+	
+	> '`pwd`/stamps/00'
 	if [ ! -d rootfs ]; then
+	(
 		mkdir -p rootfs
 		tar -xvf stage.tar.xz -C rootfs
+	) || die "Can't extract ${url_of_stage_file} to `pwd`rootfs" '00'
 	else
+	(
 		wget --no-check-cert -c ${url_of_stage_file} -O stage.tar.xz
 		mkdir -p rootfs
 		tar -xvf stage.tar.xz -C rootfs
-	fi
 	) || die "Can't download ${url_of_stage_file} and extract!" '00'
+	fi
 fi
 
 mkdir -p out
@@ -64,49 +67,49 @@ fi
 
 cp `readlink -f /etc/resolv.conf` etc
 
-if [ -e 'stamps/01' ]; then
+if [ -e '`pwd`/stamps/01' ]; then
 	echo
 else
 	(
-	> 'stamps/01'
+	> '`pwd`/stamps/01'
 	chroot . emerge --sync
 	) || die "Can't sync the portage" '01'
 fi
 
-if [ -e 'stamps/02' ]; then
+if [ -e '`pwd`/stamps/02' ]; then
 	echo
 else
 	(
-	> 'stamps/02'
+	> '`pwd`/stamps/02'
 	chroot . epro mix-ins +xfce
 	) || die "Can'r setup mix-ins!" '02'
 fi
 
-if [ -e 'stamps/03' ]; then
+if [ -e '`pwd`/stamps/03' ]; then
 	echo
 else
 	(
-	> 'stamps/03'
+	> '`pwd`/stamps/03'
 	chroot . echo "exec startxfce4 --with-ck-launch" > ~/.xinitrc
 	) || die "Can't setup xinitrd!" '03'
 fi
 
-if [ -e 'stamps/04' ]; then
+if [ -e '`pwd`/stamps/04' ]; then
 	echo
 else
 	(
-	> 'stamps/04'
+	> '`pwd`/stamps/04'
 	chroot . emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask-write --ask n
 	#	Now we must repeat above command for some reasons to 'autounmask' masked packages :)
 	chroot . emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --ask n
 	) || die "Can't emerge default packages!" '04'
 fi
 
-if [ -e 'stamps/05' ]; then
+if [ -e '`pwd`/stamps/05' ]; then
 	echo
 else
 	(
-	> 'stamps/05'
+	> '`pwd`/stamps/05'
 	chroot . rc-update add consolekit default
 	chroot . rc-update add dhcpcd default
 	chroot . echo "DISPLAYMANAGER='lightdm'" > /etc/conf.d/xdm
@@ -115,11 +118,11 @@ else
 	) || die "Can't setup rc-update!" '05'
 fi
 
-if [ -e 'stamps/06' ]; then
+if [ -e '`pwd`/stamps/06' ]; then
 	echo
 else
 	(
-	> 'stamps/06'
+	> '`pwd`/stamps/06'
 	chroot . rm -rf /usr/src/*
 	chroot . rm -rf /boot
 	chroot . mkdir -p /usr/src/linux
@@ -130,10 +133,25 @@ else
 	cd ..
 	cp -raf /usr/src/linux/* rootfs/usr/src/linux
 	cp -raf `readlink -f /vmlinuz` rootfs/boot/vmlinuz
-	if [ -e /lib64/modules/* ]; then
-		cp -raf /lib64/modules/`uname -r` rootfs/lib64/modules/`uname -r`
-		if [ -e /lib/modules/* ]; then
-			cp -raf /lib/modules/`uname -r` rootfs/lib/modules/`uname -r`
+	if [ -d /lib/modules/`uname -r` ]; then
+		cp -raf /lib/modules/`uname -r` rootfs/lib/modules/`uname -r`
+		if [ -d /lib64/modules/`uname -r` ]; then
+			if [ `uname -m` = "x86_64" ]; then
+				echo -e "\nWARN: Your host machine is multilib, it's good, but I suggest to use a `uname -m` host machine without multilib!\n\n"
+				sleep 2
+				ask_to_copy_a_multilib() {
+					unset question
+					clear
+					echo -e "\nQUESTION: Would you like to copy multilib modules from /lib64/modules/`uname -r` to `pwd`/rootfs/lib64/modules/`uname -r` ?\n[Y]es or [N]o?\n\n"
+					read question
+					case ${question} in
+						y|Y|Yes|yes) cp -raf /lib64/modules/`uname -r` rootfs/lib64/modules/`uname -r` ;;
+						n|N|No|no) echo ;;
+						*) echo -e "\nWARN: Unkown answer '${question}'!" ; sleep 2 ; ask_to_copy_a_multilib ;;
+					esac
+				}
+				ask_to_copy_a_multilib
+			fi
 		fi
 	else
 		die "Can't find kernel modules for release `uname -r`!"
@@ -143,11 +161,11 @@ else
 	) || die "Can't setup directories!" '06'
 fi
 
-if [ -e 'stamps/07' ]; then
+if [ -e '`pwd`/stamps/07' ]; then
 	echo
 else
 	(
-	> 'stamps/07'
+	> '`pwd`/stamps/07'
 	echo "
 Please provide a 'root' password:
 	"
@@ -171,12 +189,10 @@ fi
 
 }
 
-case $1 in
+case ${1} in
 build)	build_ && exit ;;
 clean)	rm -rf rootfs out stage.tar.xz stamps && exit ;;
-*)		clear && echo "
-Only use $0 <build|clean>!
-" && exit ;;
+*)		clear && echo -e "\nOnly use:\n$0 <build|clean>!\n\n" && exit ;;
 esac
 
 exit
