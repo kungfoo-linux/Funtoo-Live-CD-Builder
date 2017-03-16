@@ -195,7 +195,7 @@ fi
 case ${1} in
 build)	build_ && exit ;;
 clean)	rm -rf rootfs out stage.tar.xz stamps && exit ;;
-*)	clear && echo -e "\nOnly use:\n$0 <build|cleantouch!\n\n" && exit ;;
+*)	clear && echo -e "\nOnly use:\n$0 <build|clean>!\n\n" && exit ;;
 esac
 
 exit
