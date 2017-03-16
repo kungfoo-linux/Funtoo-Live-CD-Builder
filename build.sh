@@ -13,9 +13,9 @@ else
 	# DO NOTHING, JUST `echo`!
 	echo
 fi
-umount -f ./dev
-umount -f ./sys
-umount -f ./proc
+umount -f ./rootfs/dev
+umount -f ./rootfs/sys
+umount -f ./rootfs/proc
 exit 1
 }
 
@@ -47,32 +47,32 @@ fi
 
 mkdir -p out
 mkdir -p stamps
-cd rootfs
-mkdir -p dev sys proc
-if mount --bind /dev dev; then
+
+mkdir -p rootfs/{dev,proc,sys}
+if mount --bind /dev rootfs/dev; then
 	echo
 else
-	die "Can't bind /dev to `pwd`/dev!"
+	die "Can't bind /dev to `pwd`/rootfs/dev!"
 fi
-if mount --bind /sys sys; then
+if mount --bind /sys rootfs/sys; then
 	echo
 else
-	die "Can't bind /sys to `pwd`/sys!"
+	die "Can't bind /sys to `pwd`/rootfs/sys!"
 fi
-if mount --bind /proc proc; then
+if mount --bind /proc rootfs/proc; then
 	echo
 else
-	die "Can't bind /proc to `pwd`/proc!"
+	die "Can't bind /proc to `pwd`/rootfs/proc!"
 fi
 
-cp `readlink -f /etc/resolv.conf` etc
+cp `readlink -f /etc/resolv.conf` rootfs/etc
 
 if [ -e '`pwd`/stamps/01' ]; then
 	echo
 else
 	(
 	touch '`pwd`/stamps/01'
-	chroot . emerge --sync
+	chroot rootfs emerge --sync
 	) || die "Can't sync the portage" '01'
 fi
 
@@ -81,7 +81,7 @@ if [ -e '`pwd`/stamps/02' ]; then
 else
 	(
 	touch '`pwd`/stamps/02'
-	chroot . epro mix-ins +xfce
+	chroot rootfs epro mix-ins +xfce
 	) || die "Can'r setup mix-ins!" '02'
 fi
 
@@ -90,7 +90,7 @@ if [ -e '`pwd`/stamps/03' ]; then
 else
 	(
 	touch '`pwd`/stamps/03'
-	chroot . echo "exec startxfce4 --with-ck-launch" > ~/.xinitrc
+	chroot rootfs echo "exec startxfce4 --with-ck-launch" > ~/.xinitrc
 	) || die "Can't setup xinitrd!" '03'
 fi
 
@@ -99,13 +99,13 @@ if [ -e '`pwd`/stamps/04' ]; then
 else
 	(
 	cp -raf stage/* rootfs
-	chroot . rm -rf /etc/portage/make.conf*
-	chroot . ln -s ${portage_make_dot_conf} /etc/portage/make.conf
-	chroot . ln -s ${portage_make_dot_conf} /etc/portage/make.conf.example
+	chroot rootfs rm -rf /etc/portage/make.conf*
+	chroot rootfs ln -s ${portage_make_dot_conf} /etc/portage/make.conf
+	chroot rootfs ln -s ${portage_make_dot_conf} /etc/portage/make.conf.example
 	touch '`pwd`/stamps/04'
-	chroot . emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask-write --ask n
+	chroot rootfs emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask-write --ask n
 	#	Now we must repeat above command for some reasons to 'autounmask' masked packages :)
-	chroot . emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --ask n
+	chroot rootfs emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --ask n
 	) || die "Can't emerge default packages!" '04'
 fi
 
@@ -114,11 +114,11 @@ if [ -e '`pwd`/stamps/05' ]; then
 else
 	(
 	touch '`pwd`/stamps/05'
-	chroot . rc-update add consolekit default
-	chroot . rc-update add dhcpcd default
-	chroot . echo "DISPLAYMANAGER='lightdm'" > /etc/conf.d/xdm
-	chroot . rc-update add xdm default
-	chroot . rc-update add dbus default
+	chroot rootfs rc-update add consolekit default
+	chroot rootfs rc-update add dhcpcd default
+	chroot rootfs echo "DISPLAYMANAGER='lightdm'" > /etc/conf.d/xdm
+	chroot rootfs rc-update add xdm default
+	chroot rootfs rc-update add dbus default
 	) || die "Can't setup rc-update!" '05'
 fi
 
@@ -127,14 +127,13 @@ if [ -e '`pwd`/stamps/06' ]; then
 else
 	(
 	touch '`pwd`/stamps/06'
-	chroot . rm -rf /usr/src/*
-	chroot . rm -rf /boot
-	chroot . mkdir -p /usr/src/linux
-	chroot . rm -rf /etc/motd
-	chroot . mkdir -p /boot
-	chroot . rm -rf /lib/modules/*
-	chroot . rm -rf /lib64/modules/*
-	cd ..
+	chroot rootfs rm -rf /usr/src/*
+	chroot rootfs rm -rf /boot
+	chroot rootfs mkdir -p /usr/src/linux
+	chroot rootfs rm -rf /etc/motd
+	chroot rootfs mkdir -p /boot
+	chroot rootfs rm -rf /lib/modules/*
+	chroot rootfs rm -rf /lib64/modules/*
 	cp -raf /usr/src/linux/* rootfs/usr/src/linux
 	cp -raf `readlink -f /vmlinuz` rootfs/boot/vmlinuz
 	if [ -d /lib/modules/`uname -r` ]; then
@@ -172,15 +171,14 @@ else
 	echo "
 Please provide a 'root' password:
 	"
-	chroot . passwd root
+	chroot rootfs passwd root
 	) || die "Can't setup password for root!" '07'
 fi
 
-if chroot . /tmp/linx-live/build; then
-	umount -f ./dev
-	umount -f ./proc
-	umount -f ./sys
-	cd ..
+if chroot rootfs /tmp/linx-live/build; then
+	umount -f ./rootfs/dev
+	umount -f ./rootfs/proc
+	umount -f ./rootfs/sys
 	mv -f rootfs/*.iso rootfs/*.zip out
 	clear
 	echo "
