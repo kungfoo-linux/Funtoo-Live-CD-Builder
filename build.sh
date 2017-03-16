@@ -7,11 +7,11 @@ die() {
 echo "
 ERROR: $1
 "
-if [ "`pwd`/stamps/$2"="`pwd`/stamps/" ]; then
+if [ "./stamps/$2"="./stamps/" ]; then
 	# DO NOTHING, JUST `echo`!
 	echo
 else
-	rm -rf "`pwd`/stamps/$2"
+	rm -rf "./stamps/$2"
 fi
 umount -f ./rootfs/dev
 umount -f ./rootfs/sys
@@ -30,15 +30,15 @@ mkdir -p out
 mkdir -p stamps
 mkdir -p rootfs
 
-if [ -e '`pwd`/stamps/00' ]; then
+if [ -e './stamps/00' ]; then
 	echo
 else
 	
-	touch '`pwd`/stamps/00'
+	touch './stamps/00'
 	if [ ! -d rootfs ]; then
 	(
 		tar -xvf stage.tar.xz -C rootfs
-	) || die "Can't extract ${url_of_stage_file} to `pwd`rootfs" '00'
+	) || die "Can't extract ${url_of_stage_file} to .rootfs" '00'
 	else
 	(
 		wget --no-check-cert -c ${url_of_stage_file} -O stage.tar.xz
@@ -53,49 +53,49 @@ mkdir -p rootfs/{dev,proc,sys}
 if mount --bind /dev rootfs/dev; then
 	echo
 else
-	die "Can't bind /dev to `pwd`/rootfs/dev!"
+	die "Can't bind /dev to ./rootfs/dev!"
 fi
 if mount --bind /sys rootfs/sys; then
 	echo
 else
-	die "Can't bind /sys to `pwd`/rootfs/sys!"
+	die "Can't bind /sys to ./rootfs/sys!"
 fi
 if mount --bind /proc rootfs/proc; then
 	echo
 else
-	die "Can't bind /proc to `pwd`/rootfs/proc!"
+	die "Can't bind /proc to ./rootfs/proc!"
 fi
 
 cp `readlink -f /etc/resolv.conf` rootfs/etc
 
-if [ -e '`pwd`/stamps/01' ]; then
+if [ -e './stamps/01' ]; then
 	echo
 else
 	(
-	touch '`pwd`/stamps/01'
+	touch './stamps/01'
 	chroot rootfs emerge --sync
 	) || die "Can't sync the portage" '01'
 fi
 
-if [ -e '`pwd`/stamps/02' ]; then
+if [ -e './stamps/02' ]; then
 	echo
 else
 	(
-	touch '`pwd`/stamps/02'
+	touch './stamps/02'
 	chroot rootfs epro mix-ins +xfce
 	) || die "Can'r setup mix-ins!" '02'
 fi
 
-if [ -e '`pwd`/stamps/03' ]; then
+if [ -e './stamps/03' ]; then
 	echo
 else
 	(
-	touch '`pwd`/stamps/03'
+	touch './stamps/03'
 	chroot rootfs echo "exec startxfce4 --with-ck-launch" > ~/.xinitrc
 	) || die "Can't setup xinitrd!" '03'
 fi
 
-if [ -e '`pwd`/stamps/04' ]; then
+if [ -e './stamps/04' ]; then
 	echo
 else
 	(
@@ -103,18 +103,18 @@ else
 	chroot rootfs rm -rf /etc/portage/make.conf*
 	chroot rootfs ln -s ${portage_make_dot_conf} /etc/portage/make.conf
 	chroot rootfs ln -s ${portage_make_dot_conf} /etc/portage/make.conf.example
-	touch '`pwd`/stamps/04'
+	touch './stamps/04'
 	chroot rootfs emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask-write --ask n
 	#	Now we must repeat above command for some reasons to 'autounmask' masked packages :)
 	chroot rootfs emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --ask n
 	) || die "Can't emerge default packages!" '04'
 fi
 
-if [ -e '`pwd`/stamps/05' ]; then
+if [ -e './stamps/05' ]; then
 	echo
 else
 	(
-	touch '`pwd`/stamps/05'
+	touch './stamps/05'
 	chroot rootfs rc-update add consolekit default
 	chroot rootfs rc-update add dhcpcd default
 	chroot rootfs echo "DISPLAYMANAGER='lightdm'" > /etc/conf.d/xdm
@@ -123,11 +123,11 @@ else
 	) || die "Can't setup rc-update!" '05'
 fi
 
-if [ -e '`pwd`/stamps/06' ]; then
+if [ -e './stamps/06' ]; then
 	echo
 else
 	(
-	touch '`pwd`/stamps/06'
+	touch './stamps/06'
 	chroot rootfs rm -rf /usr/src/*
 	chroot rootfs rm -rf /boot
 	chroot rootfs mkdir -p /usr/src/linux
@@ -146,7 +146,7 @@ else
 				ask_to_copy_a_multilib() {
 					unset question
 					clear
-					echo -e "\nQUESTION: Would you like to copy multilib modules from /lib64/modules/`uname -r` to `pwd`/rootfs/lib64/modules/`uname -r` ?\n[Y]es or [N]o?\n\n"
+					echo -e "\nQUESTION: Would you like to copy multilib modules from /lib64/modules/`uname -r` to ./rootfs/lib64/modules/`uname -r` ?\n[Y]es or [N]o?\n\n"
 					read question
 					case ${question} in
 						y|Y|Yes|yes) cp -raf /lib64/modules/`uname -r` rootfs/lib64/modules/`uname -r` ;;
@@ -164,11 +164,11 @@ else
 	) || die "Can't setup directories!" '06'
 fi
 
-if [ -e '`pwd`/stamps/07' ]; then
+if [ -e './stamps/07' ]; then
 	echo
 else
 	(
-	touch '`pwd`/stamps/07'
+	touch './stamps/07'
 	echo "
 Please provide a 'root' password:
 	"
