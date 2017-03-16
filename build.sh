@@ -7,8 +7,8 @@ die() {
 echo "
 ERROR: $1
 "
-if [ -e "stamps/$2" ]; then
-	rm -rf "stamps/$2"
+if [ -e "`pwd`/stamps/$2" ]; then
+	rm -rf "`pwd`/stamps/$2"
 else
 	# DO NOTHING, JUST `echo`!
 	echo
@@ -21,8 +21,8 @@ exit 1
 
 build_() {
 case `uname -m` in
-i[3-6]86) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-32bit/generic_32/stage3-latest.tar.xz ;;
-x86_64) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-64bit/generic_64/stage3-latest.tar.xz ;;
+i[3-6]86) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-32bit/generic_32/stage3-latest.tar.xz ; export portage_make_dot_conf=/usr/share/portage/make.conf.i686 ;;
+x86_64) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-64bit/generic_64/stage3-latest.tar.xz ; export portage_make_dot_conf=/usr/share/portage/make.conf.x86_64 ;;
 *) die "Architecture `uname -m` is'nt supported!" ;;
 esac
 
@@ -30,7 +30,7 @@ if [ -e '`pwd`/stamps/00' ]; then
 	echo
 else
 	
-	> '`pwd`/stamps/00'
+	touch '`pwd`/stamps/00'
 	if [ ! -d rootfs ]; then
 	(
 		mkdir -p rootfs
@@ -71,7 +71,7 @@ if [ -e '`pwd`/stamps/01' ]; then
 	echo
 else
 	(
-	> '`pwd`/stamps/01'
+	touch '`pwd`/stamps/01'
 	chroot . emerge --sync
 	) || die "Can't sync the portage" '01'
 fi
@@ -80,7 +80,7 @@ if [ -e '`pwd`/stamps/02' ]; then
 	echo
 else
 	(
-	> '`pwd`/stamps/02'
+	touch '`pwd`/stamps/02'
 	chroot . epro mix-ins +xfce
 	) || die "Can'r setup mix-ins!" '02'
 fi
@@ -89,7 +89,7 @@ if [ -e '`pwd`/stamps/03' ]; then
 	echo
 else
 	(
-	> '`pwd`/stamps/03'
+	touch '`pwd`/stamps/03'
 	chroot . echo "exec startxfce4 --with-ck-launch" > ~/.xinitrc
 	) || die "Can't setup xinitrd!" '03'
 fi
@@ -98,7 +98,11 @@ if [ -e '`pwd`/stamps/04' ]; then
 	echo
 else
 	(
-	> '`pwd`/stamps/04'
+	cp -raf stage/* rootfs
+	chroot . rm -rf /etc/portage/make.conf*
+	chroot . ln -s ${portage_make_dot_conf} /etc/portage/make.conf
+	chroot . ln -s ${portage_make_dot_conf} /etc/portage/make.conf.example
+	touch '`pwd`/stamps/04'
 	chroot . emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask-write --ask n
 	#	Now we must repeat above command for some reasons to 'autounmask' masked packages :)
 	chroot . emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --ask n
@@ -109,10 +113,10 @@ if [ -e '`pwd`/stamps/05' ]; then
 	echo
 else
 	(
-	> '`pwd`/stamps/05'
+	touch '`pwd`/stamps/05'
 	chroot . rc-update add consolekit default
 	chroot . rc-update add dhcpcd default
-	chroot . echo "DISPLAYMANAGER='lightdm'" > /etc/conf.d/xdm
+	chroot . echo "DISPLAYMANAGER='lightdm'" touch /etc/conf.d/xdm
 	chroot . rc-update add xdm default
 	chroot . rc-update add dbus default
 	) || die "Can't setup rc-update!" '05'
@@ -122,7 +126,7 @@ if [ -e '`pwd`/stamps/06' ]; then
 	echo
 else
 	(
-	> '`pwd`/stamps/06'
+	touch '`pwd`/stamps/06'
 	chroot . rm -rf /usr/src/*
 	chroot . rm -rf /boot
 	chroot . mkdir -p /usr/src/linux
@@ -156,7 +160,6 @@ else
 	else
 		die "Can't find kernel modules for release `uname -r`!"
 	fi
-	cp -raf stage/* rootfs
 	cd rootfs
 	) || die "Can't setup directories!" '06'
 fi
@@ -165,7 +168,7 @@ if [ -e '`pwd`/stamps/07' ]; then
 	echo
 else
 	(
-	> '`pwd`/stamps/07'
+	touch '`pwd`/stamps/07'
 	echo "
 Please provide a 'root' password:
 	"
@@ -192,7 +195,7 @@ fi
 case ${1} in
 build)	build_ && exit ;;
 clean)	rm -rf rootfs out stage.tar.xz stamps && exit ;;
-*)		clear && echo -e "\nOnly use:\n$0 <build|clean>!\n\n" && exit ;;
+*)	clear && echo -e "\nOnly use:\n$0 <build|cleantouch!\n\n" && exit ;;
 esac
 
 exit

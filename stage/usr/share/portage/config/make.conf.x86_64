@@ -1,0 +1,2 @@
+USE="X gtk consolekit dhclient modemmanager ncurses nss ppp resolvconf wext wifi policykit qmi -alsa"
+CHOST="x86_64-pc-linux-gnu"
