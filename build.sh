@@ -116,7 +116,7 @@ else
 	touch '`pwd`/stamps/05'
 	chroot . rc-update add consolekit default
 	chroot . rc-update add dhcpcd default
-	chroot . echo "DISPLAYMANAGER='lightdm'" touch /etc/conf.d/xdm
+	chroot . echo "DISPLAYMANAGER='lightdm'" > /etc/conf.d/xdm
 	chroot . rc-update add xdm default
 	chroot . rc-update add dbus default
 	) || die "Can't setup rc-update!" '05'
@@ -177,7 +177,9 @@ Please provide a 'root' password:
 fi
 
 if chroot . /tmp/linx-live/build; then
-	umount -f dev proc sys
+	umount -f ./dev
+	umount -f ./proc
+	umount -f ./sys
 	cd ..
 	mv -f rootfs/*.iso rootfs/*.zip out
 	clear
