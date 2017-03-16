@@ -7,11 +7,11 @@ die() {
 echo "
 ERROR: $1
 "
-if [ -e "`pwd`/stamps/$2" ]; then
-	rm -rf "`pwd`/stamps/$2"
-else
+if [ "`pwd`/stamps/$2"="`pwd`/stamps/" ]; then
 	# DO NOTHING, JUST `echo`!
 	echo
+else
+	rm -rf "`pwd`/stamps/$2"
 fi
 umount -f ./rootfs/dev
 umount -f ./rootfs/sys
