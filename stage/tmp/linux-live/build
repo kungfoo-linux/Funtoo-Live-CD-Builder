@@ -8,6 +8,8 @@ echo "Changing current directory to $CHANGEDIR"
 CWD="$(pwd)"
 cd $CHANGEDIR
 
+cp -raf config .config
+
 . ./.config || exit 1
 . ./livekitlib || exit 1
 
@@ -18,7 +20,7 @@ if [ "$(mksquashfs 2>&1 | grep "Xdict-size")" = "" ]; then
 fi
 
 # build initramfs image
-cp -raf config .config
+
 echo "Building intramfs image..."
 cd initramfs
 INITRAMFS=$(./initramfs_create "$LIVEKITNAME")
