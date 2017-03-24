@@ -209,7 +209,7 @@ fi
 
 dialog --title "COPYING PROCESS" --infobox "Funtoo installer is copying the system to your harddisk.\n\n Please be patient ... it may take up to 10 minutes depending on your system!" 10 70 
 
-cp -raf /{bin,boot,etc,home,lib,lib64,root,sbin,srv,usr,var,run} /mnt/`cat $TMP/pout | cut -b 6-9` 2>/dev/null
+cp -raf /{bin,boot,etc,home,lib,lib32,lib64,root,sbin,srv,usr,var,run} /mnt/`cat $TMP/pout | cut -b 6-9` 2>/dev/null
 
 mkdir /mnt/`cat $TMP/pout | cut -b 6-9`/dev 2>/dev/null
 mkdir /mnt/`cat $TMP/pout | cut -b 6-9`/proc 2>/dev/null
