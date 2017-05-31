@@ -89,7 +89,7 @@ if [ ! -e './stamps/01' ]; then
 	) || die "Can't sync the portage" '01'
 fi
 
-if [ ! -e './stamps/02' ]; th
+if [ ! -e './stamps/02' ]; then
 	(
 	touch './stamps/02'
 	chroot rootfs epro flavor desktop
