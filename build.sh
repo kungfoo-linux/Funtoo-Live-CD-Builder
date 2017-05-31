@@ -1,15 +1,14 @@
 #!/bin/sh
 
-#  The powerfull tool for building daily Funtoo Live CD
-#     by Daniel K. aka *DANiO*
+#	The powerfull tool for building daily Funtoo Live CD
+#		by Daniel K. aka *DANiO*
 
 die() {
 echo "
 ERROR: $1
 "
 if [ "./stamps/$2"="./stamps/" ]; then
-	# DO NOTHING, JUST `echo`!
-	echo
+	shift
 else
 	rm -rf "./stamps/$2"
 fi
@@ -19,11 +18,28 @@ umount -f ./rootfs/proc
 exit 1
 }
 
-build_() {
-case `uname -m` in
-i[3-6]86) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-32bit/generic_32/stage3-latest.tar.xz ; export portage_make_dot_conf=/usr/share/portage/make.conf.i686 ;;
-x86_64) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-64bit/generic_64/stage3-latest.tar.xz ; export portage_make_dot_conf=/usr/share/portage/make.conf.x86_64 ;;
-*) die "Architecture `uname -m` is'nt supported!" ;;
+build() {
+unset ask_arch
+clear
+echo "
+Please, choose your prefered architecture of cpu:
+[1] is 32-bit,
+[2] is 64-bit,
+---
+Which one?
+
+NOTE: On 32-bit host machine you can't use a 64-bit for building.
+"
+read ask_arch
+case ${ask_arch} in
+1)	echo "1" > .asked_arch.cfg ;;
+2)	echo "2" > .asked_arch.cfg ;;
+esac
+
+case `cat .asked_arch.cfg` in
+1) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-32bit/generic_32/stage3-latest.tar.xz ; export portage_make_dot_conf=/usr/share/portage/make.conf.i686 ;;
+2) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-64bit/generic_64/stage3-latest.tar.xz ; export portage_make_dot_conf=/usr/share/portage/make.conf.x86_64 ;;
+*) die "Architecture is'nt supported or unkown option '`cat .asked_arch.cfg`' !" ;;
 esac
 
 mkdir -p out
@@ -31,45 +47,42 @@ mkdir -p stamps
 mkdir -p rootfs
 
 if [ -e './stamps/00' ]; then
-	echo
+	shift
 else
-	
 	touch './stamps/00'
-	if [ ! -d rootfs ]; then
+	if [ ! -d rootfs && -e stage.tar.xz ]; then
 	(
-		tar -xvf stage.tar.xz -C rootfs
-	) || die "Can't extract ${url_of_stage_file} to .rootfs" '00'
+		tar -xf stage.tar.xz -C rootfs
+	) || die "Can't extract ${url_of_stage_file} to ./rootfs" '00'
 	else
 	(
 		wget --no-check-cert -c ${url_of_stage_file} -O stage.tar.xz
-		tar -xvf stage.tar.xz -C rootfs
+		tar -xf stage.tar.xz -C rootfs
 	) || die "Can't download ${url_of_stage_file} and extract!" '00'
 	fi
 fi
 
-
-
 mkdir -p rootfs/{dev,proc,sys}
 if mount --bind /dev rootfs/dev; then
-	echo
+	shift
 else
 	die "Can't bind /dev to ./rootfs/dev!"
 fi
 if mount --bind /sys rootfs/sys; then
-	echo
+	shift
 else
 	die "Can't bind /sys to ./rootfs/sys!"
 fi
 if mount --bind /proc rootfs/proc; then
-	echo
+	shift
 else
 	die "Can't bind /proc to ./rootfs/proc!"
 fi
 
-cp `readlink -f /etc/resolv.conf` rootfs/etc
+cp -raf `readlink -f /etc/resolv.conf` rootfs/etc
 
 if [ -e './stamps/01' ]; then
-	echo
+	shift
 else
 	(
 	touch './stamps/01'
@@ -78,16 +91,17 @@ else
 fi
 
 if [ -e './stamps/02' ]; then
-	echo
+	shift
 else
 	(
 	touch './stamps/02'
+	chroot rootfs epro flavor desktop
 	chroot rootfs epro mix-ins +xfce
 	) || die "Can'r setup mix-ins!" '02'
 fi
 
 if [ -e './stamps/03' ]; then
-	echo
+	shift
 else
 	(
 	touch './stamps/03'
@@ -96,22 +110,25 @@ else
 fi
 
 if [ -e './stamps/04' ]; then
-	echo
+	shift
 else
 	(
 	cp -raf stage/* rootfs
 	chroot rootfs rm -rf /etc/portage/make.conf*
-	chroot rootfs ln -s ${portage_make_dot_conf} /etc/portage/make.conf
-	chroot rootfs ln -s ${portage_make_dot_conf} /etc/portage/make.conf.example
+	chroot rootfs ln -sf ${portage_make_dot_conf} /etc/portage/make.conf
+	chroot rootfs ln -sf ${portage_make_dot_conf} /etc/portage/make.conf.example
 	touch './stamps/04'
-	chroot rootfs emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask-write --ask n
-	#	Now we must repeat above command for some reasons to 'autounmask' masked packages :)
-	chroot rootfs emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --ask n
+	chroot rootfs emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask --autounmask-write --ask n
+	chroot rootfs etc-update <<eot
+-3
+eot
+	#	Now we must repeat above command for some reasons to 'autounmask' masked packages!
+	chroot rootfs emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask --autounmask-write --ask n
 	) || die "Can't emerge default packages!" '04'
 fi
 
 if [ -e './stamps/05' ]; then
-	echo
+	shift
 else
 	(
 	touch './stamps/05'
@@ -124,62 +141,23 @@ else
 fi
 
 if [ -e './stamps/06' ]; then
-	echo
+	shift
 else
 	(
 	touch './stamps/06'
-	chroot rootfs rm -rf /usr/src/*
-	chroot rootfs rm -rf /boot
-	chroot rootfs mkdir -p /usr/src/linux
-	chroot rootfs rm -rf /etc/motd
-	chroot rootfs mkdir -p /boot
-	chroot rootfs rm -rf /lib/modules/*
-	chroot rootfs rm -rf /lib64/modules/*
-	cp -raf /usr/src/linux/* rootfs/usr/src/linux
-	cp -raf `readlink -f /vmlinuz` rootfs/boot/vmlinuz
-	if [ -d /lib/modules/`uname -r` ]; then
-		cp -raf /lib/modules/`uname -r` rootfs/lib/modules/`uname -r`
-		if [ -d /lib64/modules/`uname -r` ]; then
-			if [ `uname -m` = "x86_64" ]; then
-				echo -e "\nWARN: Your host machine is multilib, it's good, but I suggest to use a `uname -m` host machine without multilib!\n\n"
-				sleep 2
-				ask_to_copy_a_multilib() {
-					unset question
-					clear
-					echo -e "\nQUESTION: Would you like to copy multilib modules from /lib64/modules/`uname -r` to ./rootfs/lib64/modules/`uname -r` ?\n[Y]es or [N]o?\n\n"
-					read question
-					case ${question} in
-						y|Y|Yes|yes) cp -raf /lib64/modules/`uname -r` rootfs/lib64/modules/`uname -r` ;;
-						n|N|No|no) echo ;;
-						*) echo -e "\nWARN: Unkown answer '${question}'!" ; sleep 2 ; ask_to_copy_a_multilib ;;
-					esac
-				}
-				ask_to_copy_a_multilib
-			fi
-		fi
-	else
-		die "Can't find kernel modules for release `uname -r`!"
-	fi
-	cd rootfs
-	) || die "Can't setup directories!" '06'
-fi
-
-if [ -e './stamps/07' ]; then
-	echo
-else
-	(
-	touch './stamps/07'
 	echo "
 Please provide a 'root' password:
 	"
-	chroot rootfs passwd root
-	) || die "Can't setup password for root!" '07'
+	while !	chroot rootfs passwd root; do
+		:
+	done
+	) || die "Can't setup password for root!" '06'
 fi
 
 if chroot rootfs /tmp/linx-live/build; then
-	umount -f ./rootfs/dev
-	umount -f ./rootfs/proc
-	umount -f ./rootfs/sys
+	umount -f rootfs/dev
+	umount -f rootfs/proc
+	umount -f rootfs/sys
 	mv -f rootfs/*.iso rootfs/*.zip out
 	clear
 	echo "
@@ -190,13 +168,11 @@ FIND IMAGES IN `pwd`/out DIR :)
 else
 	die "Can't create final images!"
 fi
-
 }
 
 case ${1} in
-build)	build_ && exit ;;
-clean)	rm -rf rootfs out stage.tar.xz stamps && exit ;;
-*)	clear && echo -e "\nOnly use:\n$0 <build|clean>!\n\n" && exit ;;
+build)	build && exit ;;
+clean)	rm -rf rootfs out stage.tar.xz stamps .asked_arch.cfg && exit ;;
+clean-variable)	rm -rf .asked_arch.cfg && exit ;;
+*)	clear && echo -e "\nOnly use:\n`basename $0` <build|clean|clean-variable>\n" && exit ;;
 esac
-
-exit

@@ -165,10 +165,10 @@ fi
 # choose root partition
 dialog --clear --title "CHOOSE ROOT PARTITION" --inputbox "Please give me your preferred root partition in this way:\n\n /dev/hdaX --- X = number of the partition, e. g. 2 for /dev/hda2!" 10 70 2> $TMP/pout
 
-dialog --clear --title "FORMAT ROOT PARTITION" --radiolist "Now you can choose the filesystem for your root partition.\n\n ReiserFS is the recommended filesystem." 10 70 0 \
-"1" "ext2" off \
+dialog --clear --title "FORMAT ROOT PARTITION" --radiolist "Now you can choose the filesystem for your root partition.\n" 10 70 0 \
+"1" "ext2" on \
 "2" "ext3" off \
-"3" "reiserfs" on \
+"3" "reiserfs" off \
 2> $TMP/part
 if [ $? = 1 ] ; then
 exit
@@ -209,7 +209,7 @@ fi
 
 dialog --title "COPYING PROCESS" --infobox "Funtoo installer is copying the system to your harddisk.\n\n Please be patient ... it may take up to 10 minutes depending on your system!" 10 70 
 
-cp -raf /{bin,boot,etc,home,lib,lib32,lib64,root,sbin,srv,usr,var,run} /mnt/`cat $TMP/pout | cut -b 6-9` 2>/dev/null
+cp -raf /{bin,boot,etc,home,lib,lib64,root,sbin,srv,usr,var,run} /mnt/`cat $TMP/pout | cut -b 6-9` 2>/dev/null
 
 mkdir /mnt/`cat $TMP/pout | cut -b 6-9`/dev 2>/dev/null
 mkdir /mnt/`cat $TMP/pout | cut -b 6-9`/proc 2>/dev/null
@@ -226,7 +226,7 @@ fi
 echo `cat $TMP/SeTfstab` > /mnt/`cat $TMP/pout | cut -b 6-9`/etc/fstab 2>/dev/null
 echo `cat $TMP/SeTfstab2` >> /mnt/`cat $TMP/pout | cut -b 6-9`/etc/fstab 2>/dev/null
 
-rm -f /mnt/`cat $TMP/pout | cut -b 6-9`/etc/boot.conf
+rm -rf /mnt/`cat $TMP/pout | cut -b 6-9`/etc/boot.conf
 
 echo "boot {
 	generate grub
@@ -237,9 +237,9 @@ echo "boot {
 	kernel vmlinuz[-v]
 }" > /mnt/`cat $TMP/pout | cut -b 6-9`/etc/boot.conf
 
-mount -o bind /dev /mnt/`cat $TMP/pout | cut -b 6-9`/dev
-mount -o bind /proc /mnt/`cat $TMP/pout | cut -b 6-9`/proc
-mount -o bind /sys /mnt/`cat $TMP/pout | cut -b 6-9`/sys
+mount --bind /dev /mnt/`cat $TMP/pout | cut -b 6-9`/dev
+mount --bind /proc /mnt/`cat $TMP/pout | cut -b 6-9`/proc
+mount --bind /sys /mnt/`cat $TMP/pout | cut -b 6-9`/sys
 
 chroot /mnt/`cat $TMP/pout | cut -b 6-9` grub-install /dev/`cat $TMP/pout | cut -b 6-9`
 chroot /mnt/`cat $TMP/pout | cut -b 6-9` boot-update
@@ -254,8 +254,11 @@ chroot /mnt/`cat $TMP/pout | cut -b 6-9` boot-update
 #  root = /dev/`cat $TMP/pout | cut -b 6-9`
 #  label = Funtoo
 #  read-only" > /mnt/`cat $TMP/pout | cut -b 6-9`/etc/lilo.conf
-
 #lilo -r /mnt/`cat $TMP/pout | cut -b 6-9`
+
+umount -f /mnt/`cat $TMP/pout | cut -b 6-9`/dev
+umount -f /mnt/`cat $TMP/pout | cut -b 6-9`/proc
+umount -f /mnt/`cat $TMP/pout | cut -b 6-9`/sys
 
 ask_for_zoneinfo() {
 clear
@@ -279,13 +282,13 @@ sleep 2
 ask_for_zoneinfo
 fi
 
-cp -f /usr/share/zoneinfo/$zoneinfo /mnt/`cat $TMP/pout | cut -b 6-9`/etc/localtime
+cp -rf /usr/share/zoneinfo/$zoneinfo /mnt/`cat $TMP/pout | cut -b 6-9`/etc/localtime
 echo "$zoneinfo" > /mnt/`cat $TMP/pout | cut -b 6-9`/etc/timezone
 }
 
 ask_for_hostname() {
-rm -f /mnt/`cat $TMP/pout | cut -b 6-9`/etc/conf.d/hostname
-rm -f /mnt/`cat $TMP/pout | cut -b 6-9`/etc/hostname
+rm -rf /mnt/`cat $TMP/pout | cut -b 6-9`/etc/conf.d/hostname
+rm -rf /mnt/`cat $TMP/pout | cut -b 6-9`/etc/hostname
 clear
 echo "
 What is your hostname (computer name)?
@@ -299,16 +302,9 @@ This hostname can not be empty
 sleep 2
 ask_for_hostname
 fi
-echo "$hostname" > /mnt/`cat $TMP/pout | cut -b 6-9`/etc/hostname
+#echo "$hostname" > /mnt/`cat $TMP/pout | cut -b 6-9`/etc/hostname
 echo "hostname='$hostname'" > /mnt/`cat $TMP/pout | cut -b 6-9`/etc/conf.d/hostname
 }
-
-ask_for_zoneinfo
-ask_for_hostname
-
-rm -rf $TMP
-
-clear
 
 echo "
 Installation sem to be complete!
@@ -330,4 +326,8 @@ N|n|No|no)		exit ;;
 esac
 }
 
+rm -rf $TMP
+ask_for_zoneinfo
+ask_for_hostname
+clear
 finish

@@ -5,10 +5,7 @@ export PATH=.:./tools:../tools:/usr/sbin:/usr/bin:/sbin:/bin:/
 
 CHANGEDIR=$(dirname $(readlink -f $0))
 echo "Changing current directory to $CHANGEDIR"
-CWD="$(pwd)"
 cd $CHANGEDIR
-
-cp -raf config .config
 
 . ./.config || exit 1
 . ./livekitlib || exit 1
@@ -20,10 +17,10 @@ if [ "$(mksquashfs 2>&1 | grep "Xdict-size")" = "" ]; then
 fi
 
 # build initramfs image
-
+cp -raf config .config
 echo "Building intramfs image..."
 cd initramfs
-INITRAMFS=$(./initramfs_create "$LIVEKITNAME")
+INITRAMFS=`./initramfs_create "$LIVEKITNAME"`
 cd ..
 
 # create live kit filesystem (cpio archive)
@@ -36,14 +33,19 @@ mv "$INITRAMFS" $BOOT/initrfs.img
 cp bootfiles/* $BOOT
 cat bootfiles/syslinux.cfg | sed -r "s:/boot/:/$LIVEKITNAME/boot/:" > $BOOT/syslinux.cfg
 cat bootfiles/bootinst.bat | sed -r "s:/boot/:/$LIVEKITNAME/boot/:" | sed -r "s:\\\\boot\\\\:\\\\$LIVEKITNAME\\\\boot\\\\:" > $BOOT/bootinst.bat
-cp $VMLINUZ $BOOT/
+
+if [ -e /boot/vmlinuz* ]; then
+	mv -f /boot/vmlinuz* $BOOT/vmlinuz
+else
+	mv -f /boot/kernel* $BOOT/vmlinuz
+fi
 
 if [ -d sb ]; then
    cp sb/* $LIVEKITDATA/$LIVEKITNAME/
 else
    # create compressed bundles
    for i in $MKMOD; do
-      mksquashfs /$i $LIVEKITDATA/$LIVEKITNAME/$i.$BEXT -comp xz -b 512k -keep-as-directory
+      mksquashfs /$i $LIVEKITDATA/$LIVEKITNAME/$i.$BEXT -comp xz -keep-as-directory
    done
 fi
 
@@ -60,14 +62,13 @@ if [ ! -d $TARGET ]; then
    TARGET=/tmp
 fi
 
-ARCH=$(uname -m)
+ARCH=`uname -m`
 
 timedate=`date +"%m-%d-%Y"`
 
 mkisofs -o "/$LIVEKITNAME-$ARCH-${timedate}.iso" -v -J -R -D -A "$LIVEKITNAME" -V "$LIVEKITNAME" -no-emul-boot -boot-info-table -boot-load-size 4 -b "$LIVEKITNAME"/boot/isolinux.bin -c "$LIVEKITNAME"/boot/isolinux.boot . >/dev/null 2>/dev/null || exit 1
 
-cat "$CWD/bootinfo.txt" | fgrep -v "#" | sed -r "s/mylinux/$LIVEKITNAME/" | sed -r "s/\$/
-/" > readme.txt
+cat "$CWD/bootinfo.txt" | fgrep -v "#" | sed -r "s/mylinux/$LIVEKITNAME/" | sed -r "s/\$//" > readme.txt
 echo "Creating ZIP for USB boot..."
 rm -f "/$LIVEKITNAME-$ARCH-*.zip"
 zip -0 -r "/$LIVEKITNAME-$ARCH-${timedate}.zip" * || exit 1

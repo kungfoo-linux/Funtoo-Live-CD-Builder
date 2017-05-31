@@ -1,9 +1,9 @@
 #!/bin/bash
 LIVEKITNAME="Funtoo"
-VMLINUZ=/boot/vmlinuz
-KERNEL=$(uname -r)
+#VMLINUZ=/boot/vmlinuz
+#KERNEL=$(uname -r)
 MKMOD="bin boot etc home lib lib32 lib64 opt root sbin srv usr var"
 EXCLUDE="/etc/fstab /etc/mtab"
 LIVEKITDATA=/tmp/$LIVEKITNAME-data-$$
 BEXT=sfs
-LMK="lib/modules/$KERNEL"
+#LMK="lib/modules/$KERNEL"
