@@ -114,6 +114,7 @@ if [ -e './stamps/04' ]; then
 else
 	(
 	cp -raf stage/* rootfs
+	chroot rootfs rm -rf /etc/motd
 	chroot rootfs rm -rf /etc/portage/make.conf*
 	chroot rootfs ln -sf ${portage_make_dot_conf} /etc/portage/make.conf
 	chroot rootfs ln -sf ${portage_make_dot_conf} /etc/portage/make.conf.example
