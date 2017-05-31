@@ -46,9 +46,7 @@ mkdir -p out
 mkdir -p stamps
 mkdir -p rootfs
 
-if [ -e './stamps/00' ]; then
-	shift
-else
+if [ ! -e './stamps/00' ]; then
 	touch './stamps/00'
 	if [ ! -d rootfs && -e stage.tar.xz ]; then
 	(
@@ -81,18 +79,14 @@ fi
 
 cp -raf `readlink -f /etc/resolv.conf` rootfs/etc
 
-if [ -e './stamps/01' ]; then
-	shift
-else
+if [ ! -e './stamps/01' ]; then
 	(
 	touch './stamps/01'
 	chroot rootfs emerge --sync
 	) || die "Can't sync the portage" '01'
 fi
 
-if [ -e './stamps/02' ]; then
-	shift
-else
+if [ ! -e './stamps/02' ]; th
 	(
 	touch './stamps/02'
 	chroot rootfs epro flavor desktop
@@ -100,18 +94,14 @@ else
 	) || die "Can'r setup mix-ins!" '02'
 fi
 
-if [ -e './stamps/03' ]; then
-	shift
-else
+if [ ! -e './stamps/03' ]; then
 	(
 	touch './stamps/03'
 	chroot rootfs echo "exec startxfce4 --with-ck-launch" > ~/.xinitrc
 	) || die "Can't setup xinitrd!" '03'
 fi
 
-if [ -e './stamps/04' ]; then
-	shift
-else
+if [ ! -e './stamps/04' ]; then
 	(
 	cp -raf stage/* rootfs
 	chroot rootfs rm -rf /etc/motd
@@ -128,9 +118,7 @@ eot
 	) || die "Can't emerge default packages!" '04'
 fi
 
-if [ -e './stamps/05' ]; then
-	shift
-else
+if [ ! -e './stamps/05' ]; then
 	(
 	touch './stamps/05'
 	chroot rootfs rc-update add consolekit default
@@ -141,9 +129,7 @@ else
 	) || die "Can't setup rc-update!" '05'
 fi
 
-if [ -e './stamps/06' ]; then
-	shift
-else
+if [ ! -e './stamps/06' ]; then
 	(
 	touch './stamps/06'
 	echo "
