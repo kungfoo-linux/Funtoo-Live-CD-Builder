@@ -19,9 +19,10 @@ exit 1
 }
 
 build() {
-unset ask_arch
-clear
-echo "
+if [ ! -e ".asked_arch.cfg" ]; then
+	unset ask_arch
+	clear
+	echo "
 Please, choose your prefered architecture of cpu:
 [1] is 32-bit,
 [2] is 64-bit,
@@ -30,11 +31,13 @@ Which one?
 
 NOTE: On 32-bit host machine you can't use a 64-bit for building.
 "
-read ask_arch
-case ${ask_arch} in
-1)	echo "1" > .asked_arch.cfg ;;
-2)	echo "2" > .asked_arch.cfg ;;
-esac
+	read ask_arch
+	case ${ask_arch} in
+	1)	echo "1" > .asked_arch.cfg ;;
+	2)	echo "2" > .asked_arch.cfg ;;
+	*)	echo "Unkown choice '${ask_arch}' !" ; sleep 3 ; build ;;
+	esac
+fi
 
 case `cat .asked_arch.cfg` in
 1) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-32bit/generic_32/stage3-latest.tar.xz ; export portage_make_dot_conf=/usr/share/portage/make.conf.i686 ;;
@@ -98,7 +101,7 @@ if [ ! -e './stamps/03' ]; then
 	(
 	touch './stamps/03'
 	chroot rootfs echo "exec startxfce4 --with-ck-launch" > ~/.xinitrc
-	) || die "Can't setup xinitrd!" '03'
+	) || die "Can't setup xinitrc!" '03'
 fi
 
 if [ ! -e './stamps/04' ]; then
@@ -109,12 +112,12 @@ if [ ! -e './stamps/04' ]; then
 	chroot rootfs ln -sf ${portage_make_dot_conf} /etc/portage/make.conf
 	chroot rootfs ln -sf ${portage_make_dot_conf} /etc/portage/make.conf.example
 	touch './stamps/04'
-	chroot rootfs emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask --autounmask-write --ask n
+	chroot rootfs emerge -v boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask --autounmask-write --ask n
 	chroot rootfs etc-update <<eot
 -3
 eot
 	#	Now we must repeat above command for some reasons to 'autounmask' masked packages!
-	chroot rootfs emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask --autounmask-write --ask n
+	chroot rootfs emerge -v boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask --autounmask-write --ask n
 	) || die "Can't emerge default packages!" '04'
 fi
 
