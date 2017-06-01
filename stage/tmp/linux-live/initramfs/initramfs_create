@@ -29,6 +29,12 @@ copy_including_deps()
         copy_including_deps "$LIB"
      done
 
+   for MOD in $(find "$1" -type f | grep .ko); do
+      for DEP in $(cat /$LMK/modules.dep | fgrep /$(basename $MOD):); do
+         copy_including_deps "/$LMK/$DEP"
+      done
+   done
+
    shift
    if [ "$1" != "" ]; then
        copy_including_deps "$@"
@@ -66,13 +72,34 @@ mknod $INITRAMFS/dev/tty4 c 4 4
 #copy_including_deps /usr/bin/strace
 #copy_including_deps /usr/bin/lsof
 
-# TODO: add all common filesystems which are NOT compiled in kernel already
-copy_including_deps /$LMK/kernel/fs/squashfs
+copy_including_deps /$LMK/kernel/fs # all filesystems
 copy_including_deps /$LMK/kernel/drivers/staging/zsmalloc # needed by zram
-copy_including_deps /$LMK/kernel/drivers/staging/zram
+copy_including_deps /$LMK/kernel/drivers/block/zram
 copy_including_deps /$LMK/kernel/drivers/block/loop.*
-copy_including_deps /$LMK/kernel/fs/fuse
+
+# usb drivers
+copy_including_deps /$LMK/kernel/drivers/usb/storage/usb-storage.*
+copy_including_deps /$LMK/kernel/drivers/usb/host
+copy_including_deps /$LMK/kernel/drivers/usb/common
+copy_including_deps /$LMK/kernel/drivers/usb/core
+copy_including_deps /$LMK/kernel/drivers/hid/usbhid
+copy_including_deps /$LMK/kernel/drivers/hid/hid.*
+copy_including_deps /$LMK/kernel/drivers/hid/uhid.*
+copy_including_deps /$LMK/kernel/drivers/hid/hid-generic.*
+
+# disk and cdrom drivers
+copy_including_deps /$LMK/kernel/drivers/cdrom
+copy_including_deps /$LMK/kernel/drivers/scsi/sr_mod.*
+copy_including_deps /$LMK/kernel/drivers/scsi/sd_mod.*
+copy_including_deps /$LMK/kernel/drivers/scsi/scsi_mod.*
+copy_including_deps /$LMK/kernel/drivers/scsi/sg.*
+copy_including_deps /$LMK/kernel/drivers/ata
+
+# copy all custom-built modules
+copy_including_deps /$LMK/updates
+
 copy_including_deps /$LMK/modules.*
+
 
 find $INITRAMFS -name "*.ko.gz" -exec gunzip {} \;
 
@@ -95,8 +122,9 @@ cp ../livekitlib $INITRAMFS/lib/
 cp ../.config $INITRAMFS/lib/
 
 cd $INITRAMFS
-find . | cpio -o -H newc 2>/dev/null | xz -cf9e -C crc32 >$INITRAMFS.img
+find . -print | cpio -o -H newc 2>/dev/null | xz -f --extreme --check=crc32 >$INITRAMFS.img
 echo $INITRAMFS.img
 
 cd ..
 rm -Rf $INITRAMFS
+#mv $INITRAMFS.img /tmp/initrfs.img
