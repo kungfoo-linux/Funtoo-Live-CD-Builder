@@ -7,14 +7,14 @@ die() {
 echo "
 ERROR: $1
 "
-if [ "./stamps/$2"="./stamps/" ]; then
+if [ "stamps/$2"="stamps/" ]; then
 	shift
 else
-	rm -rf "./stamps/$2"
+	rm -rf "stamps/$2"
 fi
-umount -f ./rootfs/dev
-umount -f ./rootfs/sys
-umount -f ./rootfs/proc
+umount -f rootfs/dev
+umount -f rootfs/sys
+umount -f rootfs/proc
 exit 1
 }
 
@@ -54,7 +54,7 @@ if [ ! -e './stamps/00' ]; then
 	if [ ! -d rootfs && -e stage.tar.xz ]; then
 	(
 		tar -xf stage.tar.xz -C rootfs
-	) || die "Can't extract ${url_of_stage_file} to ./rootfs" '00'
+	) || die "Can't extract ${url_of_stage_file} to `pwd`/rootfs" '00'
 	else
 	(
 		wget --no-check-cert -c ${url_of_stage_file} -O stage.tar.xz
@@ -67,17 +67,17 @@ mkdir -p rootfs/{dev,proc,sys}
 if mount --bind /dev rootfs/dev; then
 	shift
 else
-	die "Can't bind /dev to ./rootfs/dev!"
+	die "Can't bind /dev to `pwd`/rootfs/dev!"
 fi
 if mount --bind /sys rootfs/sys; then
 	shift
 else
-	die "Can't bind /sys to ./rootfs/sys!"
+	die "Can't bind /sys to `pwd`/rootfs/sys!"
 fi
 if mount --bind /proc rootfs/proc; then
 	shift
 else
-	die "Can't bind /proc to ./rootfs/proc!"
+	die "Can't bind /proc to `pwd`/rootfs/proc!"
 fi
 
 cp -raf `readlink -f /etc/resolv.conf` rootfs/etc
@@ -94,7 +94,7 @@ if [ ! -e './stamps/02' ]; then
 	touch './stamps/02'
 	chroot rootfs epro flavor desktop
 	chroot rootfs epro mix-ins +xfce
-	) || die "Can'r setup mix-ins!" '02'
+	) || die "Can't setup mix-ins!" '02'
 fi
 
 if [ ! -e './stamps/03' ]; then
@@ -112,12 +112,12 @@ if [ ! -e './stamps/04' ]; then
 	chroot rootfs ln -sf ${portage_make_dot_conf} /etc/portage/make.conf
 	chroot rootfs ln -sf ${portage_make_dot_conf} /etc/portage/make.conf.example
 	touch './stamps/04'
-	chroot rootfs emerge -v boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask --autounmask-write --ask n
+	chroot rootfs emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask --autounmask-write --ask n
 	chroot rootfs etc-update <<eot
 -3
 eot
 	#	Now we must repeat above command for some reasons to 'autounmask' masked packages!
-	chroot rootfs emerge -v boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask --autounmask-write --ask n
+	chroot rootfs emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask --autounmask-write --ask n
 	) || die "Can't emerge default packages!" '04'
 fi
 
@@ -144,6 +144,8 @@ Please provide a 'root' password:
 	) || die "Can't setup password for root!" '06'
 fi
 
+chroot rootfs rm -rf /usr/portage/distfiles/*
+
 if chroot rootfs /tmp/linx-live/build; then
 	umount -f rootfs/dev
 	umount -f rootfs/proc
@@ -161,8 +163,8 @@ fi
 }
 
 case ${1} in
-build)	build && exit ;;
-clean)	rm -rf rootfs out stage.tar.xz stamps .asked_arch.cfg && exit ;;
-clean-variable)	rm -rf .asked_arch.cfg && exit ;;
-*)	clear && echo -e "\nOnly use:\n`basename $0` <build|clean|clean-variable>\n" && exit ;;
+build)	build ; exit ;;
+clean)	rm -rf rootfs out stage.tar.xz stamps .asked_arch.cfg ; exit ;;
+clean-variable)	rm -rf .asked_arch.cfg ; exit ;;
+*)	clear ; echo -e "\nOnly use:\n`basename $0` <build|clean|clean-variable>\n" ; exit ;;
 esac
