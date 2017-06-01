@@ -148,16 +148,39 @@ init_proc_sysfs()
    ln -sf /proc/mounts /etc/mtab
 }
 
+
+# modprobe all modules found in initial ramdisk
+modprobe_everything()
+{
+   debug_log "modprobe_everything" "$*"
+
+   echo_green_star >&2
+   echo "Probing for hardware" >&2
+
+   find /lib/modules/ | fgrep .ko | xargs -n 1 modprobe 2>/dev/null
+   refresh_devs
+}
+
+
+refresh_devs()
+{
+   debug_log "refresh_devs" "$*"
+   if [ -r /proc/sys/kernel/hotplug ]; then
+      echo /sbin/mdev > /proc/sys/kernel/hotplug
+   fi
+   mdev -s
+}
+
+
 # make sure some devices are there
 init_devs()
 {
    debug_log "init_devs" "$*"
-   echo /sbin/mdev > /proc/sys/kernel/hotplug
-   mdev -s
    modprobe zram 2>/dev/null
    modprobe loop 2>/dev/null
    modprobe squashfs 2>/dev/null
    modprobe fuse 2>/dev/null
+   refresh_devs
 }
 
 # Activate zram (auto-compression of RAM)
@@ -168,11 +191,13 @@ init_zram()
 {
    debug_log "init_zram" "$*"
    echo_green_star
-   echo "Setting dynamic RAM compression using ZRAM"
-   echo 536870912 > /sys/block/zram0/disksize # 512MB
-   mkswap /dev/zram0 >/dev/null
-   swapon /dev/zram0 -p 32767
-   echo 100 > /proc/sys/vm/swappiness
+   echo "Setting dynamic RAM compression using ZRAM if available"
+   if [ -r /sys/block/zram0/disksize ]; then
+      echo 536870912 > /sys/block/zram0/disksize # 512MB
+      mkswap /dev/zram0 >/dev/null
+      swapon /dev/zram0 -p 32767
+      echo 100 > /proc/sys/vm/swappiness
+   fi
 }
 
 # load the AUFS kernel module if needed
@@ -183,6 +208,7 @@ init_aufs()
    # TODO maybe check here if aufs support is working at all
    # and produce useful error message if user has no aufs
    modprobe aufs 2>/dev/null
+   refresh_devs
 }
 
 # Setup empty union
@@ -299,7 +325,7 @@ init_network_dev()
 
    # If we are here, none of the above specified modules worked.
    # As a last chance, try to modprobe everything.
-   find /lib/modules/ | xargs -n 1 modprobe
+   modprobe_everything
    cat /proc/net/dev | grep : | grep -v lo: | cut -d : -f 1 | tr -d " " | head -n 1
 }
 
@@ -417,6 +443,7 @@ find_data()
    echo -n "Looking for $LIVEKITNAME data in /$FROM .." | tr -s "/" >&2
    for timeout in $(seq 1 $1); do
       echo -n "." >&2
+      refresh_devs
       DATA="$(find_data_try "$2" "$FROM")"
       if [ "$DATA" != "" ]; then
          echo "" >&2
@@ -630,14 +657,14 @@ change_root()
    if [ ! -e sbin/fsck.aufs ]; then ln -s /bin/true sbin/fsck.aufs; fi
 
    # find chroot and init
-   if [ -x bin/chroot ]; then  CHROOT=bin/chroot; fi
-   if [ -x sbin/chroot ]; then  CHROOT=sbin/chroot; fi
-   if [ -x usr/bin/chroot ]; then  CHROOT=usr/bin/chroot; fi
-   if [ -x usr/sbin/chroot ]; then CHROOT=usr/sbin/chroot; fi
+   if [ -x bin/chroot -o -L bin/chroot ]; then  CHROOT=bin/chroot; fi
+   if [ -x sbin/chroot -o -L sbin/chroot ]; then  CHROOT=sbin/chroot; fi
+   if [ -x usr/bin/chroot -o -L usr/bin/chroot ]; then  CHROOT=usr/bin/chroot; fi
+   if [ -x usr/sbin/chroot -o -L usr/sbin/chroot ]; then CHROOT=usr/sbin/chroot; fi
    if [ "$CHROOT" = "" ]; then fatal "Can't find executable chroot command"; fi
 
-   if [ -x bin/init ]; then INIT=bin/init; fi
-   if [ -x sbin/init ]; then INIT=sbin/init; fi
+   if [ -x bin/init -o -L bin/init ]; then INIT=bin/init; fi
+   if [ -x sbin/init -o -L sbin/init  ]; then INIT=sbin/init; fi
    if [ "$INIT" = "" ]; then fatal "Can't find executable init command"; fi
 
    mkdir -p mnt/live
