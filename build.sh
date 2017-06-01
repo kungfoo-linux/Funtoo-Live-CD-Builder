@@ -3,6 +3,8 @@
 #	The powerfull tool for building daily Funtoo Live CD
 #		by Daniel K. aka *DANiO*
 
+set -e
+
 die() {
 echo "
 ERROR: $1
@@ -74,69 +76,93 @@ mount --bind /proc rootfs/proc || die "Can't bind /proc to `pwd`/rootfs/proc!"
 cp -raf `readlink -f /etc/resolv.conf` rootfs/etc
 
 if [ ! -e './stamps/01' ]; then
-	(
-	touch './stamps/01'
-	chroot rootfs emerge --sync
-	) || die "Can't sync the portage" '01'
+	if (
+		touch './stamps/01'
+		chroot rootfs emerge --sync
+	); then
+		shift
+	else
+		die "Can't sync the portage" '01'
+	fi
 fi
 
 if [ ! -e './stamps/02' ]; then
-	(
+	if (
 	touch './stamps/02'
-	chroot rootfs epro flavor desktop
-	chroot rootfs epro mix-ins +xfce
-	) || die "Can't setup mix-ins!" '02'
+		chroot rootfs epro flavor desktop
+		chroot rootfs epro mix-ins +xfce
+	); then
+		shift
+	else
+		die "Can't setup mix-ins!" '02'
+	fi
 fi
 
 if [ ! -e './stamps/03' ]; then
-	(
-	touch './stamps/03'
-	chroot rootfs echo "exec startxfce4 --with-ck-launch" > ~/.xinitrc
-	) || die "Can't setup xinitrc!" '03'
+	if (
+		touch './stamps/03'
+		chroot rootfs echo "exec startxfce4 --with-ck-launch" > ~/.xinitrc
+	); then
+		shift
+	else
+		die "Can't setup xinitrc!" '03'
+	fi
 fi
 
 if [ ! -e './stamps/04' ]; then
-	(
-	cp -raf stage/* rootfs
-	chroot rootfs rm -rf /etc/motd
-	chroot rootfs rm -rf /etc/portage/make.conf*
-	chroot rootfs ln -sf ${portage_make_dot_conf} /etc/portage/make.conf
-	chroot rootfs ln -sf ${portage_make_dot_conf} /etc/portage/make.conf.example
-	touch './stamps/04'
-	chroot rootfs emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask --autounmask-write --verbose --ask n
-	chroot rootfs etc-update <<eot
+	if (
+		cp -raf stage/* rootfs
+		chroot rootfs rm -rf /etc/motd
+		chroot rootfs rm -rf /etc/portage/make.conf*
+		chroot rootfs ln -sf ${portage_make_dot_conf} /etc/portage/make.conf
+		chroot rootfs ln -sf ${portage_make_dot_conf} /etc/portage/make.conf.example
+		touch './stamps/04'
+		chroot rootfs emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask --autounmask-write --verbose --ask n
+		chroot rootfs etc-update <<eot
 -3
 eot
-	#	Now we must repeat above command for some reasons to 'autounmask' masked packages!
-	chroot rootfs emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask --autounmask-write --verbose --ask n
-	) || die "Can't emerge default packages!" '04'
+		#	Now we must repeat above command for some reasons to 'autounmask' masked packages!
+		chroot rootfs emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask --autounmask-write --verbose --ask n
+	); then
+		shift
+	else
+		die "Can't emerge default packages!" '04'
+	fi
 fi
 
 if [ ! -e './stamps/05' ]; then
-	(
-	touch './stamps/05'
-	chroot rootfs rc-update add consolekit default
-	chroot rootfs rc-update add dhcpcd default
-	chroot rootfs echo "DISPLAYMANAGER='lightdm'" > /etc/conf.d/xdm
-	chroot rootfs rc-update add xdm default
-	chroot rootfs rc-update add dbus default
-	) || die "Can't setup rc-update!" '05'
+	if (
+		touch './stamps/05'
+		chroot rootfs rc-update add consolekit default
+		chroot rootfs rc-update add dhcpcd default
+		chroot rootfs echo "DISPLAYMANAGER='lightdm'" > /etc/conf.d/xdm
+		chroot rootfs rc-update add xdm default
+		chroot rootfs rc-update add dbus default
+	); then
+		shift
+	else
+		die "Can't setup rc-update!" '05'
+	fi
 fi
 
 if [ ! -e './stamps/06' ]; then
-	(
-	touch './stamps/06'
+	if (
+		touch './stamps/06'
 #	echo "
 #Please provide a 'root' password:
 #	"
-	chroot rootfs passwd root <<eot
+		chroot rootfs passwd root <<eot
 toor
 eot
 	#while ! chroot rootfs passwd root; do
 	#	:
 	#done
-	echo "The 'root' password is 'toor', remember it!" > out/password_to_root.txt
-	) || die "Can't setup password for root!" '06'
+		echo "The 'root' password is 'toor', remember it!" > out/password_to_root.txt
+	); then
+		shift
+	else
+		die "Can't setup password for root!" '06'
+	fi
 fi
 
 chroot rootfs rm -rf /usr/portage/distfiles/*
