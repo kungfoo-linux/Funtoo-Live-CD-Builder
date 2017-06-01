@@ -135,9 +135,7 @@ eot
 	#while ! chroot rootfs passwd root; do
 	#	:
 	#done
-	echo "
-The 'root' password is 'toor', remember it!
-" > out/password_to_root.txt
+	echo "The 'root' password is 'toor', remember it!" > out/password_to_root.txt
 	) || die "Can't setup password for root!" '06'
 fi
 
