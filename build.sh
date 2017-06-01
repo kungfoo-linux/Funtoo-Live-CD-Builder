@@ -63,7 +63,10 @@ if [ ! -e './stamps/00' ]; then
 	fi
 fi
 
-mkdir -p rootfs/{dev,proc,sys}
+mkdir -p rootfs/dev
+mkdir -p rootfs/proc
+mkdir -p rootfs/sys
+
 mount --bind /dev rootfs/dev || die "Can't bind /dev to `pwd`/rootfs/dev!"
 mount --bind /sys rootfs/sys || die "Can't bind /sys to `pwd`/rootfs/sys!"
 mount --bind /proc rootfs/proc || die "Can't bind /proc to `pwd`/rootfs/proc!"
