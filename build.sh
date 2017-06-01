@@ -126,12 +126,18 @@ fi
 if [ ! -e './stamps/06' ]; then
 	(
 	touch './stamps/06'
+#	echo "
+#Please provide a 'root' password:
+#	"
+	chroot rootfs passwd root <<eot
+toor
+eot
+	#while ! chroot rootfs passwd root; do
+	#	:
+	#done
 	echo "
-Please provide a 'root' password:
-	"
-	while !	chroot rootfs passwd root; do
-		:
-	done
+The 'root' password is 'toor', remember it!
+" > out/password_to_root.txt
 	) || die "Can't setup password for root!" '06'
 fi
 
@@ -146,7 +152,9 @@ if chroot rootfs /tmp/linx-live/build; then
 	echo "
 ALL GOOD!
 FIND IMAGES IN `pwd`/out DIR :)
-	"
+---
+The 'root' password is 'toor', remember it!
+"
 	ls out | sort
 else
 	die "Can't create final images!"
