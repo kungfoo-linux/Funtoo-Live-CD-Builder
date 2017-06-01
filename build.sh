@@ -10,7 +10,7 @@ ERROR: $1
 if [ "stamps/$2"="stamps/" ]; then
 	shift
 else
-	rm -rf "stamps/$2"
+	rm -rf stamps/$2
 fi
 umount -f rootfs/dev
 umount -f rootfs/sys
