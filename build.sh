@@ -64,21 +64,9 @@ if [ ! -e './stamps/00' ]; then
 fi
 
 mkdir -p rootfs/{dev,proc,sys}
-if mount --bind /dev rootfs/dev; then
-	shift
-else
-	die "Can't bind /dev to `pwd`/rootfs/dev!"
-fi
-if mount --bind /sys rootfs/sys; then
-	shift
-else
-	die "Can't bind /sys to `pwd`/rootfs/sys!"
-fi
-if mount --bind /proc rootfs/proc; then
-	shift
-else
-	die "Can't bind /proc to `pwd`/rootfs/proc!"
-fi
+mount --bind /dev rootfs/dev || die "Can't bind /dev to `pwd`/rootfs/dev!"
+mount --bind /sys rootfs/sys || die "Can't bind /sys to `pwd`/rootfs/sys!"
+mount --bind /proc rootfs/proc || die "Can't bind /proc to `pwd`/rootfs/proc!"
 
 cp -raf `readlink -f /etc/resolv.conf` rootfs/etc
 
@@ -112,12 +100,12 @@ if [ ! -e './stamps/04' ]; then
 	chroot rootfs ln -sf ${portage_make_dot_conf} /etc/portage/make.conf
 	chroot rootfs ln -sf ${portage_make_dot_conf} /etc/portage/make.conf.example
 	touch './stamps/04'
-	chroot rootfs emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask --autounmask-write --ask n
+	chroot rootfs emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask --autounmask-write --verbose --ask n
 	chroot rootfs etc-update <<eot
 -3
 eot
 	#	Now we must repeat above command for some reasons to 'autounmask' masked packages!
-	chroot rootfs emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask --autounmask-write --ask n
+	chroot rootfs emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask --autounmask-write --verbose --ask n
 	) || die "Can't emerge default packages!" '04'
 fi
 
@@ -166,5 +154,5 @@ case ${1} in
 build)	build ; exit ;;
 clean)	rm -rf rootfs out stage.tar.xz stamps .asked_arch.cfg ; exit ;;
 clean-variable)	rm -rf .asked_arch.cfg ; exit ;;
-*)	clear ; echo -e "\nOnly use:\n`basename $0` <build|clean|clean-variable>\n" ; exit ;;
+*)	clear ; echo "\nOnly use:\n`basename $0` <build|clean|clean-variable>\n" ; exit ;;
 esac
