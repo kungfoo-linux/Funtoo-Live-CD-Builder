@@ -6,18 +6,18 @@
 set -e
 
 die() {
-echo "
+	echo "
 ERROR: $1
 "
-if [ "stamps/$2"="stamps/" ]; then
-	shift
-else
-	rm -rf stamps/$2
-fi
-umount -f rootfs/dev
-umount -f rootfs/sys
-umount -f rootfs/proc
-exit 1
+	if [ "stamps/$2"="stamps/" ]; then
+		shift
+	else
+		rm -rf stamps/$2
+	fi
+	umount -f rootfs/dev
+	umount -f rootfs/sys
+	umount -f rootfs/proc
+	exit 1
 }
 
 build() {
@@ -53,7 +53,7 @@ mkdir -p rootfs
 
 if [ ! -e './stamps/00' ]; then
 	touch './stamps/00'
-	if [ ! -d rootfs && -e stage.tar.xz ]; then
+	if [ -e stage.tar.xz && ! -d rootfs ]; then
 	(
 		tar -xf stage.tar.xz -C rootfs
 	) || die "Can't extract ${url_of_stage_file} to `pwd`/rootfs" '00'
@@ -88,7 +88,7 @@ fi
 
 if [ ! -e './stamps/02' ]; then
 	if (
-	touch './stamps/02'
+		touch './stamps/02'
 		chroot rootfs epro flavor desktop
 		chroot rootfs epro mix-ins +xfce
 	); then
