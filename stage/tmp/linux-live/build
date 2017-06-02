@@ -7,6 +7,8 @@ CHANGEDIR=$(dirname $(readlink -f $0))
 echo "Changing current directory to $CHANGEDIR"
 cd $CHANGEDIR
 
+mv -f config .config
+
 . ./.config || exit 1
 . ./livekitlib || exit 1
 
@@ -17,7 +19,7 @@ if [ "$(mksquashfs 2>&1 | grep "Xdict-size")" = "" ]; then
 fi
 
 # build initramfs image
-mv -f config .config
+
 echo "Building intramfs image..."
 cd initramfs
 INITRAMFS=`./initramfs_create "$LIVEKITNAME"`
