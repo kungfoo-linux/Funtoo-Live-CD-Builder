@@ -151,6 +151,7 @@ if [ ! -e './stamps/06' ]; then
 #	"
 		chroot rootfs passwd root <<eot
 toor
+toor
 eot
 	#while ! chroot rootfs passwd root; do
 	#	:
