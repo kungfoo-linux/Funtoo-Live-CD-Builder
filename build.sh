@@ -187,5 +187,5 @@ case ${1} in
 build)	build ; exit ;;
 clean)	rm -rf rootfs out stage.tar.xz stamps .asked_arch.cfg ; exit ;;
 clean-variable)	rm -rf .asked_arch.cfg ; exit ;;
-*)	clear ; echo "\nOnly use:\n`basename $0` <build|clean|clean-variable>\n" ; exit ;;
+*)	clear ; echo -e "\nOnly use:\n`basename $0` <build|clean|clean-variable>\n" ; exit ;;
 esac
