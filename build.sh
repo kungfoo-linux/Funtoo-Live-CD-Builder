@@ -9,9 +9,7 @@ die() {
 	echo "
 ERROR: $1
 "
-	if [ "stamps/$2"="stamps/" ]; then
-		shift
-	else
+	if [ ! -z "$2" ]; then
 		rm -rf stamps/$2
 	fi
 	umount -f rootfs/dev
