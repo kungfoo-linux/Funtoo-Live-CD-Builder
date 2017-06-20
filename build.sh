@@ -9,9 +9,7 @@ die() {
 	echo "
 ERROR: $1
 "
-	if [ ! -z "$2" ]; then
-		rm -rf stamps/$2
-	fi
+	[ -z "$2" ] && rm -rf stamps/$2
 	umount -f rootfs/dev
 	umount -f rootfs/sys
 	umount -f rootfs/proc
