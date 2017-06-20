@@ -67,7 +67,7 @@ fi
 
 ARCH=`uname -m`
 
-timedate=`date +"%m-%d-%Y"`
+timedate=`date +"%m-%d-%Y-%T"`
 
 mkisofs -o "/$LIVEKITNAME-$ARCH-${timedate}.iso" -v -J -R -D -A "$LIVEKITNAME" -V "$LIVEKITNAME" -no-emul-boot -boot-info-table -boot-load-size 4 -b "$LIVEKITNAME"/boot/isolinux.bin -c "$LIVEKITNAME"/boot/isolinux.boot . >/dev/null 2>/dev/null || exit 1
 
