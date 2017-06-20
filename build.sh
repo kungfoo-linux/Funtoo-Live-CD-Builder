@@ -13,6 +13,7 @@ ERROR: $1
 	umount -f rootfs/dev
 	umount -f rootfs/sys
 	umount -f rootfs/proc
+	umount -f rootfs/tmp
 	exit 1
 }
 
@@ -68,6 +69,9 @@ mkdir -p rootfs/sys
 mount --bind /dev rootfs/dev || die "Can't bind /dev to `pwd`/rootfs/dev!"
 mount --bind /sys rootfs/sys || die "Can't bind /sys to `pwd`/rootfs/sys!"
 mount --bind /proc rootfs/proc || die "Can't bind /proc to `pwd`/rootfs/proc!"
+
+# Bug: https://forums.gentoo.org/viewtopic-p-7650490.html
+mount -t tmpfs tmpfs root/tmp
 
 cp -raf `readlink -f /etc/resolv.conf` rootfs/etc
 
