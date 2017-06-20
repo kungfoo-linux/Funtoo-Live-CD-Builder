@@ -9,7 +9,7 @@ die() {
 	echo "
 ERROR: $1
 "
-	if [ -z "$2" ]; then
+	if [ ! -z "$2" ]; then
 		rm -rf stamps/$2
 	fi
 	umount -f rootfs/dev
@@ -73,7 +73,7 @@ mount --bind /sys rootfs/sys || die "Can't bind /sys to `pwd`/rootfs/sys!"
 mount --bind /proc rootfs/proc || die "Can't bind /proc to `pwd`/rootfs/proc!"
 
 # Bug: https://forums.gentoo.org/viewtopic-p-7650490.html
-mount -t tmpfs tmpfs rootfs/tmp
+mount -t tmpfs -o rw,noexec,nosuid tmp rootfs/tmp
 
 cp -raf `readlink -f /etc/resolv.conf` rootfs/etc
 
