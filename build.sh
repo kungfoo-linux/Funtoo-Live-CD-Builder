@@ -17,7 +17,7 @@ ERROR: $1
 }
 
 build() {
-if [ ! -e ".asked_arch.cfg" ]; then
+while [ ! -e ".asked_arch.cfg" ]; do
 	unset ask_arch
 	clear
 	echo "
@@ -33,9 +33,9 @@ NOTE: On 32-bit host machine you can't use a 64-bit for building.
 	case ${ask_arch} in
 	1)	echo "1" > .asked_arch.cfg ;;
 	2)	echo "2" > .asked_arch.cfg ;;
-	*)	echo "Unkown choice '${ask_arch}' !" ; sleep 3 ; build ;;
+	*)	echo "Unkown choice '${ask_arch}' !" ; sleep 3 ; : ;;
 	esac
-fi
+done
 
 case `cat .asked_arch.cfg` in
 1) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-32bit/generic_32/stage3-latest.tar.xz ; export portage_make_dot_conf=/usr/share/portage/make.conf.i686 ;;
@@ -49,7 +49,7 @@ mkdir -p rootfs
 
 if [ ! -e './stamps/00' ]; then
 	touch './stamps/00'
-	if [ -e stage.tar.xz && ! -d rootfs ]; then
+	if [ -e stage.tar.xz ] && [ ! -e rootfs/* ]; then
 	(
 		tar -xf stage.tar.xz -C rootfs
 	) || die "Can't extract ${url_of_stage_file} to `pwd`/rootfs" '00'
