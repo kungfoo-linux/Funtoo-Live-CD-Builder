@@ -211,11 +211,11 @@ dialog --title "COPYING PROCESS" --infobox "Funtoo installer is copying the syst
 
 cp -raf /{bin,boot,etc,home,lib,lib64,root,sbin,srv,usr,var,run} /mnt/`cat $TMP/pout | cut -b 6-9` 2>/dev/null
 
-mkdir -p /mnt/`cat $TMP/pout | cut -b 6-9`/dev 2>/dev/null
-mkdir -p /mnt/`cat $TMP/pout | cut -b 6-9`/proc 2>/dev/null
-mkdir -p /mnt/`cat $TMP/pout | cut -b 6-9`/sys 2>/dev/null
-mkdir -p /mnt/`cat $TMP/pout | cut -b 6-9`/tmp 2>/dev/null
-mkdir -p /mnt/`cat $TMP/pout | cut -b 6-9`/media 2>/dev/null
+mkdir /mnt/`cat $TMP/pout | cut -b 6-9`/dev 2>/dev/null
+mkdir /mnt/`cat $TMP/pout | cut -b 6-9`/proc 2>/dev/null
+mkdir /mnt/`cat $TMP/pout | cut -b 6-9`/sys 2>/dev/null
+mkdir /mnt/`cat $TMP/pout | cut -b 6-9`/tmp 2>/dev/null
+mkdir /mnt/`cat $TMP/pout | cut -b 6-9`/media 2>/dev/null
 
 dialog --clear --title "TRANSACTION FINISHED" --msgbox "Now Funtoo installer has finished the transaction." 10 70
 if [ $? = 1 ] ; then
@@ -282,7 +282,7 @@ sleep 2
 ask_for_zoneinfo
 fi
 
-cp -raf /usr/share/zoneinfo/$zoneinfo /mnt/`cat $TMP/pout | cut -b 6-9`/etc/localtime
+cp -rf /usr/share/zoneinfo/$zoneinfo /mnt/`cat $TMP/pout | cut -b 6-9`/etc/localtime
 echo "$zoneinfo" > /mnt/`cat $TMP/pout | cut -b 6-9`/etc/timezone
 }
 
@@ -321,8 +321,8 @@ Would you like to reboot in to new system?
 read choice
 case $choice in
 Y|y|Yes|yes)	reboot ;;
-N|n|No|no)	exit ;;
-*)	echo "Bad option"; sleep 2; finish ;;
+N|n|No|no)		exit ;;
+*)				echo "Bad option"; sleep 2; finish ;;
 esac
 }
 

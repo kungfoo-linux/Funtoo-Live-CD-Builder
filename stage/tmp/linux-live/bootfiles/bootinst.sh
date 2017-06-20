@@ -9,7 +9,7 @@ cd "$BOOT"
 
 # find out device and mountpoint
 PART="$(df . | tail -n 1 | tr -s " " | cut -d " " -f 1)"
-DEV="$(echo "$PART" | sed -r "s:[0-9]+\$::" | sed -r "s:([0-9])[a-z]+\$:\\1:i")"   #"
+DEV="$(echo "$PART" | sed -r "s:[0-9]+\$::" | sed -r "s:([0-9])[a-z]+\$:\\1:i")"
 
 # Try to use installed extlinux binary and fallback to extlinux.exe only
 # if no installed extlinux is not found at all.

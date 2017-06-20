@@ -6,6 +6,7 @@ export PATH=.:./tools:../tools:/usr/sbin:/usr/bin:/sbin:/bin:/
 CHANGEDIR=$(dirname $(readlink -f $0))
 echo "Changing current directory to $CHANGEDIR"
 cd $CHANGEDIR
+CWD=$(pwd)
 
 mv -f config .config
 
@@ -72,8 +73,8 @@ mkisofs -o "/$LIVEKITNAME-$ARCH-${timedate}.iso" -v -J -R -D -A "$LIVEKITNAME" -
 
 cat "$CWD/bootinfo.txt" | fgrep -v "#" | sed -r "s/mylinux/$LIVEKITNAME/" | sed -r "s/\$//" > readme.txt
 echo "Creating ZIP for USB boot..."
-rm -f "/$LIVEKITNAME-$ARCH-*.zip"
+rm -rf "/$LIVEKITNAME-$ARCH-*.zip"
 zip -0 -r "/$LIVEKITNAME-$ARCH-${timedate}.zip" * || exit 1
 
 cd ..
-rm -Rf "$LIVEKITDATA"
+rm -rf "$LIVEKITDATA"

@@ -3,8 +3,6 @@
 #	The powerfull tool for building daily Funtoo Live CD
 #		by Daniel K. aka *DANiO*
 
-set -e
-
 die() {
 	echo "
 ERROR: $1
@@ -12,11 +10,29 @@ ERROR: $1
 	if [ ! -z "$2" ]; then
 		rm -rf stamps/$2
 	fi
-	umount -f rootfs/dev
-	umount -f rootfs/sys
-	umount -f rootfs/proc
-	umount -f rootfs/tmp
+	umount_
 	exit 1
+}
+
+mount_() {
+	mkdir -p rootfs/dev
+	mkdir -p rootfs/proc
+	mkdir -p rootfs/sys
+	mount --bind /dev rootfs/dev || die "Can't bind /dev to `pwd`/rootfs/dev!"
+	mount --bind /sys rootfs/sys || die "Can't bind /sys to `pwd`/rootfs/sys!"
+	mount --bind /proc rootfs/proc || die "Can't bind /proc to `pwd`/rootfs/proc!"
+}
+
+umount_() {
+	umount -f rootfs/dev || die "Can't unbind /dev to `pwd`/rootfs/dev!"
+	umount -f rootfs/sys || die "Can't unbind /sys to `pwd`/rootfs/sys!"
+	umount -f rootfs/proc || die "Can't unbind /proc to `pwd`/rootfs/proc!"
+}
+
+compare_() {
+	if ! diff `readlink -f /etc/resolv.conf` rootfs/etc/resolv.conf >/dev/null; then
+		cp -raf `readlink -f /etc/resolv.conf` rootfs/etc
+	fi
 }
 
 build() {
@@ -64,18 +80,8 @@ if [ ! -e './stamps/00' ]; then
 	fi
 fi
 
-mkdir -p rootfs/dev
-mkdir -p rootfs/proc
-mkdir -p rootfs/sys
-
-mount --bind /dev rootfs/dev || die "Can't bind /dev to `pwd`/rootfs/dev!"
-mount --bind /sys rootfs/sys || die "Can't bind /sys to `pwd`/rootfs/sys!"
-mount --bind /proc rootfs/proc || die "Can't bind /proc to `pwd`/rootfs/proc!"
-
-# Bug: https://forums.gentoo.org/viewtopic-p-7650490.html
-mount -t tmpfs -o rw,noexec,nosuid tmp rootfs/tmp
-
-cp -raf `readlink -f /etc/resolv.conf` rootfs/etc
+mount_
+compare_
 
 if [ ! -e './stamps/01' ]; then
 	if ! (
@@ -178,9 +184,10 @@ fi
 
 case ${1} in
 build)	build ;;
+chroot)	mount_ && compare_ && chroot rootfs && umount_ ;;
 clean)	rm -rf rootfs out stage.tar.xz stamps .asked_arch.cfg ;;
 clean-variable)	rm -rf .asked_arch.cfg ;;
-*)	clear ; echo -e "\nOnly use:\n`basename $0` <build|clean|clean-variable>\n" ;;
+*)	clear ; echo -e "\nOnly use:\n`basename $0` <build|clean|chroot|clean-variable>\n" ;;
 esac
 
 exit
