@@ -119,6 +119,7 @@ if [ ! -e './stamps/04' ]; then
 		chroot rootfs ln -sf ${portage_make_dot_conf} /etc/portage/make.conf
 		chroot rootfs ln -sf ${portage_make_dot_conf} /etc/portage/make.conf.example
 		touch './stamps/04'
+		chroot rootfs emerge -uvDN --ask n --with-bdeps=y @world
 		chroot rootfs emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask --autounmask-write --verbose --ask n
 		chroot rootfs etc-update <<!
 -3
