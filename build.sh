@@ -166,9 +166,7 @@ fi
 chroot rootfs rm -rf /usr/portage/distfiles/*
 
 if chroot rootfs /tmp/linx-live/build; then
-	umount -f rootfs/dev
-	umount -f rootfs/proc
-	umount -f rootfs/sys
+	umount_
 	mv -f rootfs/*.iso rootfs/*.zip out
 	clear
 	echo "
