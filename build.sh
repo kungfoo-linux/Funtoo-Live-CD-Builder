@@ -68,7 +68,7 @@ mkdir -p rootfs
 
 if [ ! -e './stamps/00' ]; then
 	touch './stamps/00'
-	if [ -e stage.tar.xz ] && [ ! -e rootfs/* ]; then
+	if [ -e stage.tar.xz ] && [ ! -d rootfs/* ]; then
 	(
 		tar -xf stage.tar.xz -C rootfs
 	) || die "Can't extract ${url_of_stage_file} to `pwd`/rootfs" '00'
