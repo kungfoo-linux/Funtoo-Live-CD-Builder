@@ -10,6 +10,8 @@ CWD=$(pwd)
 
 mv -f config .config
 
+find /boot -name 'kernel-*' -exec echo "VMLINUZ={}" >> /tmp/linux-live/.config \;
+
 . ./.config || exit 1
 . ./livekitlib || exit 1
 
@@ -17,6 +19,15 @@ mv -f config .config
 if [ "$(mksquashfs 2>&1 | grep "Xdict-size")" = "" ]; then
    echo "mksquashfs not found or doesn't support -comp xz, aborting, no changes made"
    exit 1
+fi
+
+MKISOFS=$(which mkisofs)
+if [ "$MKISOFS" = "" ]; then
+	MKISOFS=$(which genisoimage)
+fi
+if [ "$MKISOFS" = "" ]; then
+	echo "Cannot found mkisofs or genisoimage, stop"
+	exit 3
 fi
 
 # build initramfs image
@@ -37,11 +48,7 @@ cp bootfiles/* $BOOT
 cat bootfiles/syslinux.cfg | sed -r "s:/boot/:/$LIVEKITNAME/boot/:" > $BOOT/syslinux.cfg
 cat bootfiles/bootinst.bat | sed -r "s:/boot/:/$LIVEKITNAME/boot/:" | sed -r "s:\\\\boot\\\\:\\\\$LIVEKITNAME\\\\boot\\\\:" > $BOOT/bootinst.bat
 
-if [ -e /boot/vmlinuz* ]; then
-	mv -f /boot/vmlinuz* $BOOT/vmlinuz
-else
-	mv -f /boot/kernel* $BOOT/vmlinuz
-fi
+cp $VMLINUZ $BOOT
 
 if [ -d sb ]; then
    cp sb/* $LIVEKITDATA/$LIVEKITNAME/
