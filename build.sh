@@ -11,7 +11,7 @@ ERROR: $1
 		rm -rf stamps/$2
 	fi
 	umount_
-	exit 1
+	exit $?
 }
 
 mount_() {
