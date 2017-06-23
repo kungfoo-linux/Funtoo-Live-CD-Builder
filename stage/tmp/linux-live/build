@@ -12,13 +12,13 @@ mv -f config .config
 
 find /boot -name 'kernel-*' -exec echo "VMLINUZ={}" >> /tmp/linux-live/.config \;
 
-. ./.config || exit 1
-. ./livekitlib || exit 1
+. ./.config || return 1
+. ./livekitlib || return 1
 
 # check for mksquashfs with xz compression
 if [ "$(mksquashfs 2>&1 | grep "Xdict-size")" = "" ]; then
    echo "mksquashfs not found or doesn't support -comp xz, aborting, no changes made"
-   exit 1
+   || return 1
 fi
 
 MKISOFS=$(which mkisofs)
@@ -27,7 +27,7 @@ if [ "$MKISOFS" = "" ]; then
 fi
 if [ "$MKISOFS" = "" ]; then
 	echo "Cannot found mkisofs or genisoimage, stop"
-	exit 3
+	|| return 3
 fi
 
 # build initramfs image
