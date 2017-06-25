@@ -121,12 +121,12 @@ if [ ! -e './stamps/04' ]; then
 		chroot rootfs ${lnx} chmod 7777 /tmp
 		touch './stamps/04'
 		chroot rootfs ${lnx} emerge -uvDN --ask n --with-bdeps=y @world
-		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask --autounmask-write --verbose --ask n
+		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools google-chrome geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask-write --verbose --ask n
 		chroot rootfs ${lnx} etc-update <<!
 -3
 !
 		#	Now we must repeat above command for some reasons to 'autounmask' masked packages!
-		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools opera-developer geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask --autounmask-write --verbose --ask n
+		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools google-chrome geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --verbose --ask n
 	); then
 		die "Can't emerge default packages!" '04'
 	fi
@@ -166,7 +166,7 @@ fi
 
 chroot rootfs ${lnx} rm -rf /usr/portage/distfiles/*
 
-if chroot rootfs ${lnx} /tmp/linux-live/build; then
+if chroot rootfs ${lnx} /tmp/linix-live/build; then
 	umount_
 	mv -f rootfs/*.iso rootfs/*.zip out
 	clear
