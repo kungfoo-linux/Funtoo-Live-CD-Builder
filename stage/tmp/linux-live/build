@@ -17,8 +17,7 @@ find /boot -name 'kernel-*' -exec echo "VMLINUZ={}" >> /tmp/linux-live/.config \
 
 # check for mksquashfs with xz compression
 if [ "$(mksquashfs 2>&1 | grep "Xdict-size")" = "" ]; then
-   echo "mksquashfs not found or doesn't support -comp xz, aborting, no changes made"
-   || return 1
+   echo "mksquashfs not found or doesn't support -comp xz, aborting, no changes made" || return 1
 fi
 
 MKISOFS=$(which mkisofs)
@@ -26,8 +25,7 @@ if [ "$MKISOFS" = "" ]; then
 	MKISOFS=$(which genisoimage)
 fi
 if [ "$MKISOFS" = "" ]; then
-	echo "Cannot found mkisofs or genisoimage, stop"
-	|| return 3
+	echo "Cannot found mkisofs or genisoimage, stop" || return 3
 fi
 
 # build initramfs image
