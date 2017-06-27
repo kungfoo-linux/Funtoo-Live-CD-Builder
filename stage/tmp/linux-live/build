@@ -10,7 +10,7 @@ CWD=$(pwd)
 
 mv -f config .config
 
-#find /boot -name 'kernel-*' -exec echo "VMLINUZ={}" >> /tmp/linux-live/.config \;
+find /boot -name 'kernel-*' -exec echo "VMLINUZ={}" >> /tmp/linux-live/.config \;
 
 . ./.config || return 1
 . ./livekitlib || return 1
