@@ -164,11 +164,11 @@ toor
 	fi
 fi
 
-chroot rootfs ${lnx} rm -rf /usr/portage/distfiles/*
+rm -rf rootfs/usr/portage/distfiles/*
 
 if chroot rootfs ${lnx} /tmp/linux-live/build; then
 	umount_
-	mv -f rootfs/*.iso rootfs/*.zip out
+	mv -f rootfs/*.iso out
 	clear
 	echo "
 ALL GOOD!
