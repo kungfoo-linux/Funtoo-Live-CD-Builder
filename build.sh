@@ -166,7 +166,7 @@ fi
 
 chroot rootfs ${lnx} rm -rf /usr/portage/distfiles/*
 
-if chroot rootfs ${lnx} /tmp/linix-live/build; then
+if chroot rootfs ${lnx} /tmp/linux-live/build; then
 	umount_
 	mv -f rootfs/*.iso rootfs/*.zip out
 	clear
