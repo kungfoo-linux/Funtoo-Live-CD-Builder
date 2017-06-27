@@ -10,7 +10,7 @@ CWD=$(pwd)
 
 mv -f config .config
 
-find /boot -name 'kernel-*' -exec export VMLINUZ={} \;
+echo KERNEL=`ls /boot/kernel-* | sort` >> .config
 echo LMK=`ls /lib/modules | sort` >> .config
 
 . ./.config || return 1
