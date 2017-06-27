@@ -11,7 +11,7 @@ CWD=$(pwd)
 mv -f config .config
 
 find /boot -name 'kernel-*' -exec export VMLINUZ={} \;
-echo LMK=`ls lib/modules | sort` > .config
+echo LMK=`ls /lib/modules | sort` > .config
 
 . ./.config || return 1
 . ./livekitlib || return 1
