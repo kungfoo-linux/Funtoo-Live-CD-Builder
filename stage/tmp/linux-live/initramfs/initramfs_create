@@ -77,6 +77,8 @@ copy_including_deps /$LMK/kernel/drivers/staging/zsmalloc # needed by zram
 copy_including_deps /$LMK/kernel/drivers/block/zram
 copy_including_deps /$LMK/kernel/drivers/block/loop.*
 
+copy_including_deps /$LMK/misc # missing; required by 'aufs.ko'
+
 # usb drivers
 copy_including_deps /$LMK/kernel/drivers/usb/storage/usb-storage.*
 copy_including_deps /$LMK/kernel/drivers/usb/host
