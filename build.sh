@@ -55,6 +55,7 @@ Which one?
 NOTE: On 32-bit host machine you can't use a 64-bit for building.
 "
 	read ask_arch
+	export ask_arch=${ask_arch}
 	case ${ask_arch} in
 	1)	echo "1" > .asked_arch.cfg ;;
 	2)	echo "2" > .asked_arch.cfg ;;
