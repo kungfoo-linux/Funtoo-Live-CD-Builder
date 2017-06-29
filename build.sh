@@ -127,12 +127,12 @@ if [ ! -e './stamps/04' ]; then
 		chroot rootfs ${lnx} chmod 7777 /tmp
 		touch './stamps/04'
 		chroot rootfs ${lnx} emerge -uvDN --ask n --with-bdeps=y @world
-		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta aufs3 aufs-util --autounmask-write --verbose --ask n
+		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta aufs4 aufs-util --autounmask-write --verbose --ask n
 		chroot rootfs ${lnx} etc-update <<!
 -5
 !
 		#	Now we must repeat above command for some reasons to 'autounmask' masked packages!
-		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta aufs3 aufs-util --autounmask-write --verbose --ask n
+		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta aufs4 aufs-util --autounmask-write --verbose --ask n
 	); then
 		die "Can't emerge default packages!" '04'
 	fi
