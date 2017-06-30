@@ -111,7 +111,7 @@ fi
 if [ ! -e './stamps/03' ]; then
 	if ! (
 		touch './stamps/03'
-		chroot rootfs ${lnx} echo "exec startxfce4 --with-ck-launch" > ~/.xinitrc
+		echo "exec startxfce4 --with-ck-launch" > rootfs/root/.xinitrc
 	); then
 		die "Can't setup xinitrc!" '03'
 	fi
