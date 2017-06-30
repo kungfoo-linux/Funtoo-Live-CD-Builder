@@ -132,12 +132,12 @@ if [ ! -e './stamps/04' ]; then
 		cp -raf stage/usr/src/linux/* rootfs/usr/src/linux
 		chroot rootfs ${lnx} genkernel --oldconfig --no-mountboot --no-symlink --install --no-splash --unionfs --kernel-config=${genkernel} kernel
 		chroot rootfs ${lnx} make mrproper -C /usr/src/linux
-		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask-write --verbose --ask n
+		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta lightdm-gtk-greeter --autounmask-write --verbose --ask n
 		chroot rootfs ${lnx} etc-update <<!
 -5
 !
 		#	Now we must repeat above command for some reasons to 'autounmask' masked packages!
-		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask-write --verbose --ask n
+		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta lightdm-gtk-greeter --autounmask-write --verbose --ask n
 	); then
 		die "Can't emerge default packages!" '04'
 	fi
