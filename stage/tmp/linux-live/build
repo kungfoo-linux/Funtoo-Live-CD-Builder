@@ -18,7 +18,8 @@ echo LMK=/lib/modules/`ls /lib/modules | sort` >> .config
 
 # check for mksquashfs with xz compression
 if [ "$(mksquashfs 2>&1 | grep "Xdict-size")" = "" ]; then
-   echo "mksquashfs not found or doesn't support -comp xz, aborting, no changes made" || return 1
+   echo "mksquashfs not found or doesn't support -comp xz, aborting, no changes made"
+   exit 1
 fi
 
 MKISOFS=$(which mkisofs)
@@ -26,7 +27,8 @@ if [ "$MKISOFS" = "" ]; then
 	MKISOFS=$(which genisoimage)
 fi
 if [ "$MKISOFS" = "" ]; then
-	echo "Cannot found mkisofs or genisoimage, stop" || return 3
+	echo "Cannot found mkisofs or genisoimage, stop"
+	exit 3
 fi
 
 # build initramfs image
@@ -44,7 +46,13 @@ mkdir -p "$BOOT"/../changes
 mkdir -p "$BOOT"/../modules
 mv "$INITRAMFS" $BOOT/initrfs.img
 cp bootfiles/* $BOOT
+
+# build new syslinux
+chmod +x tools/isolinux.bin.update
+tools/isolinux.bin.update
+
 cat bootfiles/syslinux.cfg | sed -r "s:/boot/:/$LIVEKITNAME/boot/:" > $BOOT/syslinux.cfg
+cat bootfiles/syslinux.cfg | sed -r "s:/boot/:/$LIVEKITNAME/boot/:" > $BOOT/isolinux.cfg # missing!!!
 cat bootfiles/bootinst.bat | sed -r "s:/boot/:/$LIVEKITNAME/boot/:" | sed -r "s:\\\\boot\\\\:\\\\$LIVEKITNAME\\\\boot\\\\:" > $BOOT/bootinst.bat
 
 cp $KERNEL $BOOT/vmlinuz
@@ -54,7 +62,7 @@ if [ -d sb ]; then
 else
    # create compressed bundles
    for i in $MKMOD; do
-      mksquashfs /$i $LIVEKITDATA/$LIVEKITNAME/$i.$BEXT -comp xz -keep-as-directory || return 1
+      mksquashfs /$i $LIVEKITDATA/$LIVEKITNAME/$i.$BEXT -comp xz -keep-as-directory
    done
 fi
 
@@ -74,7 +82,7 @@ fi
 case ${ask_arch} in
 1)	ARCH=x86_32	;;
 2)	ARCH=x86_64	;;
-*)	echo "Unkown choice '${ask_arch}' !" ; sleep 3 ; return 1 ;;
+*)	echo "Unkown choice '${ask_arch}' !" ; sleep 3 ; exit 1 ;;
 esac
 
 timedate=`date +"%m-%d-%Y-%T"`
