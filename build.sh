@@ -62,8 +62,8 @@ NOTE: On 32-bit host machine you can't use a 64-bit for building.
 done
 
 case `cat .asked_arch.cfg` in
-	1) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-32bit/generic_32/stage3-latest.tar.xz ; export portage_make_dot_conf=/usr/share/portage/make.conf.i686 ; export lnx=linux32 ;;
-	2) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-64bit/generic_64/stage3-latest.tar.xz ; export portage_make_dot_conf=/usr/share/portage/make.conf.x86_64 ; export lnx=linux64 ;;
+	1) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-32bit/generic_32/stage3-latest.tar.xz ; export portage_make_dot_conf=/usr/share/portage/make.conf.i686 ; export genkernel=/usr/share/genkernel/arch/x86/kernel-config ; export lnx=linux32 ;;
+	2) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-64bit/generic_64/stage3-latest.tar.xz ; export portage_make_dot_conf=/usr/share/portage/make.conf.x86_64 ; export genkernel=/usr/share/genkernel/arch/x86_64/kernel-config ; export lnx=linux64 ;;
 	*) die "Architecture is'nt supported or unkown option '`cat .asked_arch.cfg`' !" ;;
 esac
 
@@ -128,10 +128,7 @@ if [ ! -e './stamps/04' ]; then
 		touch './stamps/04'
 		chroot rootfs ${lnx} emerge -uvDN --ask n --with-bdeps=y @world
 		chroot rootfs ${lnx} emerge aufs-sources --autounmask-write --verbose --ask n
-		case `cat .asked_arch.cfg` in
-			1) chroot rootfs ${lnx} genkernel --no-symlink --install --no-splash --unionfs --config=/usr/share/genkernel/arch/x86/kernel-config kernel ;;
-			2) chroot rootfs ${lnx} genkernel --no-symlink --install --no-splash --unionfs --config=/usr/share/genkernel/arch/x86_64/kernel-config kernel ;;
-		esac
+		chroot rootfs ${lnx} genkernel --no-symlink --install --no-splash --unionfs --config=${genkernel} kernel
 		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask-write --verbose --ask n
 		chroot rootfs ${lnx} etc-update <<!
 -5
