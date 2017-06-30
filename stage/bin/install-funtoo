@@ -19,7 +19,6 @@ fi
 
 # Create partitions using fdisk or cfdisk.
 
-mkdir /tmp/tmp 2>/dev/null
 TMP=/tmp/tmp 2>/dev/null
 
 fdisk -l | sed -n 's/^Disk \(\/dev\/[^:]*\): \([^,]*\).*$/"\1" "\2" \\/p' >> $TMP/drivelist
