@@ -8,7 +8,9 @@ die() {
 	if [ ! -z "$2" ]; then
 		rm -rf stamps/$2
 	fi
-	umount_
+	if [ "$2" != "avoid_loop" ]; then
+		umount_
+	fi
 	exit 1
 }
 
@@ -28,9 +30,9 @@ mount_() {
 }
 
 umount_() {
-	umount -f rootfs/dev || die "Can't unbind /dev from `pwd`/rootfs/dev!"
-	umount -f rootfs/sys || die "Can't unbind /sys from `pwd`/rootfs/sys!"
-	umount -f rootfs/proc || die "Can't unbind /proc from `pwd`/rootfs/proc!"
+	umount -f rootfs/dev || die "Can't unbind /dev from `pwd`/rootfs/dev!" 'avoid_loop'
+	umount -f rootfs/sys || die "Can't unbind /sys from `pwd`/rootfs/sys!" 'avoid_loop'
+	umount -f rootfs/proc || die "Can't unbind /proc from `pwd`/rootfs/proc!" 'avoid_loop'
 }
 
 compare_() {
