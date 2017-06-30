@@ -55,7 +55,6 @@ Which one?
 NOTE: On 32-bit host machine you can't use a 64-bit for building.
 "
 	read ask_arch
-	export ask_arch=${ask_arch}
 	case ${ask_arch} in
 		1)	echo "1" > .asked_arch.cfg ;;
 		2)	echo "2" > .asked_arch.cfg ;;
@@ -129,7 +128,7 @@ if [ ! -e './stamps/04' ]; then
 		touch './stamps/04'
 		chroot rootfs ${lnx} emerge -uvDN --ask n --with-bdeps=y @world
 		chroot rootfs ${lnx} emerge aufs-sources --autounmask-write --verbose --ask n
-		cp -raf stage/* rootfs
+		cp -raf stage/* .asked_arch.cfg rootfs
 		cp -raf stage/usr/src/linux/* rootfs/usr/src/linux
 		chroot rootfs ${lnx} genkernel --oldconfig --no-mountboot --no-symlink --install --no-splash --unionfs --kernel-config=${genkernel} kernel
 		chroot rootfs ${lnx} make mrproper -C /usr/src/linux

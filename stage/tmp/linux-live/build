@@ -8,13 +8,19 @@ echo "Changing current directory to $CHANGEDIR"
 cd $CHANGEDIR
 CWD=$(pwd)
 
-mv -f config .config
+cp -raf config .config
+
+case `cat /.asked_arch.cfg` in
+	1)	ARCH=x86_32	;;
+	2)	ARCH=x86_64	;;
+	*)	echo "Unkown choice '${ask_arch}' !" ; sleep 3 ; exit 1 ;;
+esac
 
 echo KERNEL=`ls /boot/kernel-* | sort` >> .config
 echo LMK=/lib/modules/`ls /lib/modules | sort` >> .config
 
-. ./.config || return 1
-. ./livekitlib || return 1
+. ./.config || exit 1
+. ./livekitlib || exit 1
 
 # check for mksquashfs with xz compression
 if [ "$(mksquashfs 2>&1 | grep "Xdict-size")" = "" ]; then
@@ -31,8 +37,13 @@ if [ "$MKISOFS" = "" ]; then
 	exit 3
 fi
 
-# build initramfs image
+# build new syslinux
+chmod +x `pwd`/tools/isolinux.bin.update || exit 1
+cd tools
+`pwd`/isolinux.bin.update || exit 1
+cd ..
 
+# build initramfs image
 echo "Building intramfs image..."
 cd initramfs
 INITRAMFS=`./initramfs_create "$LIVEKITNAME"`
@@ -46,10 +57,6 @@ mkdir -p "$BOOT"/../changes
 mkdir -p "$BOOT"/../modules
 mv "$INITRAMFS" $BOOT/initrfs.img
 cp bootfiles/* $BOOT
-
-# build new syslinux
-chmod +x tools/isolinux.bin.update
-tools/isolinux.bin.update
 
 cat bootfiles/syslinux.cfg | sed -r "s:/boot/:/$LIVEKITNAME/boot/:" > $BOOT/syslinux.cfg
 cat bootfiles/syslinux.cfg | sed -r "s:/boot/:/$LIVEKITNAME/boot/:" > $BOOT/isolinux.cfg # missing!!!
@@ -79,15 +86,9 @@ if [ ! -d $TARGET ]; then
    TARGET=/tmp
 fi
 
-case ${ask_arch} in
-1)	ARCH=x86_32	;;
-2)	ARCH=x86_64	;;
-*)	echo "Unkown choice '${ask_arch}' !" ; sleep 3 ; exit 1 ;;
-esac
-
 timedate=`date +"%m-%d-%Y-%T"`
 
-mkisofs -o "/$LIVEKITNAME-$ARCH-${timedate}.iso" -v -J -R -D -A "$LIVEKITNAME" -V "$LIVEKITNAME" -no-emul-boot -boot-info-table -boot-load-size 4 -b "$LIVEKITNAME"/boot/isolinux.bin -c "$LIVEKITNAME"/boot/isolinux.boot . >/dev/null 2>/dev/null || return 1
+mkisofs -o "/$LIVEKITNAME-$ARCH-${timedate}.iso" -v -J -R -D -A "$LIVEKITNAME" -V "$LIVEKITNAME" -no-emul-boot -boot-info-table -boot-load-size 4 -b "$LIVEKITNAME"/boot/isolinux.bin -c "$LIVEKITNAME"/boot/isolinux.boot . >/dev/null 2>/dev/null || exit 1
 
 cd ..
 rm -rf "$LIVEKITDATA"
