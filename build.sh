@@ -128,7 +128,7 @@ if [ ! -e './stamps/04' ]; then
 		touch './stamps/04'
 		chroot rootfs ${lnx} emerge -uvDN --ask n --with-bdeps=y @world
 		chroot rootfs ${lnx} emerge aufs-sources --autounmask-write --verbose --ask n
-		chroot rootfs ${lnx} genkernel --no-symlink --install --no-splash --unionfs --config=${genkernel} kernel
+		chroot rootfs ${lnx} genkernel --no-mountboot --no-symlink --install --no-splash --unionfs --config=${genkernel} kernel
 		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask-write --verbose --ask n
 		chroot rootfs ${lnx} etc-update <<!
 -5
