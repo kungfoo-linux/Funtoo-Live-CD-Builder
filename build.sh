@@ -148,7 +148,7 @@ if [ ! -e './stamps/05' ]; then
 		touch './stamps/05'
 		chroot rootfs ${lnx} rc-update add consolekit default
 		chroot rootfs ${lnx} rc-update add dhcpcd default
-		chroot rootfs ${lnx} echo "DISPLAYMANAGER='lightdm'" > /etc/conf.d/xdm
+		echo "DISPLAYMANAGER='lightdm'" > rootfs/etc/conf.d/xdm
 		chroot rootfs ${lnx} rc-update add xdm default
 		chroot rootfs ${lnx} rc-update add dbus default
 	); then
