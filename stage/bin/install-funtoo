@@ -234,7 +234,7 @@ echo "boot {
 }
 
 'Funtoo Linux' {
-	kernel vmlinuz[-v]
+	kernel kernel[-v]
 }" > /mnt/`cat $TMP/pout | cut -b 6-9`/etc/boot.conf
 
 mount --bind /dev /mnt/`cat $TMP/pout | cut -b 6-9`/dev

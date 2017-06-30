@@ -1,3 +1,3 @@
-USE="-X gtk consolekit dhclient modemmanager ncurses nss python nls ppp resolvconf wext wifi policykit qmi -alsa"
+USE="-X -kernel-patch -nfs -ramfs -fuse -hfs gtk consolekit dhclient modemmanager ncurses nss python nls ppp resolvconf wext wifi policykit qmi -alsa"
 CHOST="x86_64-pc-linux-gnu"
 ABI_X86="64 -32 -x32"

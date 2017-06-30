@@ -4,9 +4,7 @@
 #		by Daniel K. aka *DANiO*
 
 die() {
-	echo "
-ERROR: $1
-"
+	echo -e "\nERROR: $1\n"
 	if [ ! -z "$2" ]; then
 		rm -rf stamps/$2
 	fi
@@ -57,16 +55,16 @@ NOTE: On 32-bit host machine you can't use a 64-bit for building.
 	read ask_arch
 	export ask_arch=${ask_arch}
 	case ${ask_arch} in
-	1)	echo "1" > .asked_arch.cfg ;;
-	2)	echo "2" > .asked_arch.cfg ;;
-	*)	echo "Unkown choice '${ask_arch}' !" ; sleep 3 ; : ;;
+		1)	echo "1" > .asked_arch.cfg ;;
+		2)	echo "2" > .asked_arch.cfg ;;
+		*)	echo "Unkown choice '${ask_arch}' !" ; sleep 3 ; : ;;
 	esac
 done
 
 case `cat .asked_arch.cfg` in
-1) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-32bit/generic_32/stage3-latest.tar.xz ; export portage_make_dot_conf=/usr/share/portage/make.conf.i686 ; export lnx=linux32 ;;
-2) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-64bit/generic_64/stage3-latest.tar.xz ; export portage_make_dot_conf=/usr/share/portage/make.conf.x86_64 ; export lnx=linux64 ;;
-*) die "Architecture is'nt supported or unkown option '`cat .asked_arch.cfg`' !" ;;
+	1) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-32bit/generic_32/stage3-latest.tar.xz ; export portage_make_dot_conf=/usr/share/portage/make.conf.i686 ; export lnx=linux32 ;;
+	2) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-64bit/generic_64/stage3-latest.tar.xz ; export portage_make_dot_conf=/usr/share/portage/make.conf.x86_64 ; export lnx=linux64 ;;
+	*) die "Architecture is'nt supported or unkown option '`cat .asked_arch.cfg`' !" ;;
 esac
 
 mkdir -p out
@@ -121,19 +119,25 @@ fi
 if [ ! -e './stamps/04' ]; then
 	if ! (
 		cp -raf stage/* rootfs
+		rm -rf rootfs/boot/{kernel-*,initramfs-*,System.map-*} rootfs/lib/modules/* rootfs/usr/src/linux*
 		chroot rootfs ${lnx} rm -rf /etc/motd
 		chroot rootfs ${lnx} rm -rf /etc/portage/make.conf*
-		chroot rootfs ${lnx} ln -sf ${portage_make_dot_conf} /etc/portage/make.conf
-		chroot rootfs ${lnx} ln -sf ${portage_make_dot_conf} /etc/portage/make.conf.example
+		chroot rootfs ${lnx} ln -s ${portage_make_dot_conf} /etc/portage/make.conf
+		chroot rootfs ${lnx} ln -s ${portage_make_dot_conf} /etc/portage/make.conf.example
 		chroot rootfs ${lnx} chmod 7777 /tmp
 		touch './stamps/04'
 		chroot rootfs ${lnx} emerge -uvDN --ask n --with-bdeps=y @world
-		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta aufs4 aufs-util --autounmask-write --verbose --ask n
+		chroot rootfs ${lnx} emerge aufs-sources --autounmask-write --verbose --ask n
+		case `uname -m` in
+			i?86) chroot rootfs ${lnx} genkernel --no-symlink --install --no-splash --unionfs --config=/usr/share/genkernel/arch/x86/kernel-config kernel ;;
+			x86_64) chroot rootfs ${lnx} genkernel --no-symlink --install --no-splash --unionfs --config=/usr/share/genkernel/arch/x86_64/kernel-config kernel ;;
+		esac
+		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask-write --verbose --ask n
 		chroot rootfs ${lnx} etc-update <<!
 -5
 !
 		#	Now we must repeat above command for some reasons to 'autounmask' masked packages!
-		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta aufs4 aufs-util --autounmask-write --verbose --ask n
+		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta --autounmask-write --verbose --ask n
 	); then
 		die "Can't emerge default packages!" '04'
 	fi
@@ -190,11 +194,11 @@ fi
 }
 
 case ${1} in
-build)	build ;;
-chroot)	mount_ && compare_ && chroot rootfs ${lnx} && umount_ ;;
-clean)	rm -rf rootfs out stage.tar.xz stamps .asked_arch.cfg ;;
-clean-variable)	rm -rf .asked_arch.cfg ;;
-*)	clear ; echo -e "\nOnly use:\n`basename $0` <build|clean|chroot|clean-variable>\n" ;;
+	build)	build ;;
+	chroot)	mount_ && compare_ && chroot rootfs ${2} && umount_ ;;
+	clean)	rm -rf rootfs out stage.tar.xz stamps .asked_arch.cfg ;;
+	clean-variable)	rm -rf .asked_arch.cfg ;;
+	*)	clear ; echo -e "\nOnly use:\n`basename $0` <build|clean|chroot|clean-variable>\n" ;;
 esac
 
 exit
