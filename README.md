@@ -1,7 +1,5 @@
 # The powerfull tool for building daily Funtoo Live CD
 
----
-
 [![Build Status](https://travis-ci.org/danielkot/Funtoo-Live-CD-Builder.svg?branch=master)](https://travis-ci.org/danielkot/Funtoo-Live-CD-Builder)
 
 ---
