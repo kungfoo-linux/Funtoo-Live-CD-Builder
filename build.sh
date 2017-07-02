@@ -72,7 +72,7 @@ compare_
 if [ ! -e './stamps/01' ]; then
 	if ! (
 		touch './stamps/01'
-		chroot rootfs ${lnx} emerge --sync
+		chroot rootfs ${lnx} emerge --sync >/dev/null
 	); then
 		die "Can't sync the portage" '01'
 	fi
@@ -81,8 +81,8 @@ fi
 if [ ! -e './stamps/02' ]; then
 	if ! (
 		touch './stamps/02'
-		chroot rootfs ${lnx} epro flavor desktop
-		chroot rootfs ${lnx} epro mix-ins +xfce
+		chroot rootfs ${lnx} epro flavor desktop >/dev/null
+		chroot rootfs ${lnx} epro mix-ins +xfce >/dev/null
 	); then
 		die "Can't setup mix-ins!" '02'
 	fi
@@ -106,18 +106,18 @@ if [ ! -e './stamps/04' ]; then
 		chroot rootfs ${lnx} ln -s ${portage_make_dot_conf} /etc/portage/make.conf.example
 		chroot rootfs ${lnx} chmod 7777 /tmp
 		touch './stamps/04'
-		chroot rootfs ${lnx} emerge -uDN --ask n --with-bdeps=y @world
-		chroot rootfs ${lnx} emerge aufs-sources --autounmask-write --ask n
+		chroot rootfs ${lnx} emerge -uDN --ask n --with-bdeps=y @world >/dev/null
+		chroot rootfs ${lnx} emerge aufs-sources --autounmask-write --ask n >/dev/null
 		cp -raf stage/* .asked_arch.cfg rootfs
 		cp -raf stage/usr/src/linux/* rootfs/usr/src/linux
 		chroot rootfs ${lnx} genkernel --oldconfig --no-mountboot --no-symlink --install --no-splash --unionfs --kernel-config=${genkernel} kernel
 		chroot rootfs ${lnx} make mrproper -C /usr/src/linux
-		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta lightdm-gtk-greeter --autounmask-write --ask n
+		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta lightdm-gtk-greeter --autounmask-write --ask n >/dev/null
 		chroot rootfs ${lnx} etc-update <<!
 -5
 !
 		#	Now we must repeat above command for some reasons to 'autounmask' masked packages!
-		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta lightdm-gtk-greeter --autounmask-write --ask n
+		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta lightdm-gtk-greeter --autounmask-write --ask n >/dev/null
 	); then
 		die "Can't emerge default packages!" '04'
 	fi
@@ -126,11 +126,11 @@ fi
 if [ ! -e './stamps/05' ]; then
 	if ! (
 		touch './stamps/05'
-		chroot rootfs ${lnx} rc-update add consolekit default
-		chroot rootfs ${lnx} rc-update add dhcpcd default
+		chroot rootfs ${lnx} rc-update add consolekit default >/dev/null
+		chroot rootfs ${lnx} rc-update add dhcpcd default >/dev/null
 		echo "DISPLAYMANAGER='lightdm'" > rootfs/etc/conf.d/xdm
-		chroot rootfs ${lnx} rc-update add xdm default
-		chroot rootfs ${lnx} rc-update add dbus default
+		chroot rootfs ${lnx} rc-update add xdm default >/dev/null
+		chroot rootfs ${lnx} rc-update add dbus default >/dev/null
 	); then
 		die "Can't setup rc-update!" '05'
 	fi
@@ -156,7 +156,7 @@ fi
 
 rm -rf rootfs/usr/portage/distfiles/*
 
-if chroot rootfs ${lnx} /tmp/linux-live/build; then
+if chroot rootfs ${lnx} /tmp/linux-live/build >/dev/null; then
 	umount_
 	mv -f rootfs/*.iso out
 	ls out | sort
