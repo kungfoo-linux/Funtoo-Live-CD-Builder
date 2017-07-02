@@ -42,26 +42,6 @@ compare_() {
 }
 
 build() {
-while [ ! -e ".asked_arch.cfg" ]; do
-	unset ask_arch
-	clear
-	echo "
-Please, choose your prefered architecture of cpu:
-[1] is 32-bit,
-[2] is 64-bit,
----
-Which one?
-
-NOTE: On 32-bit host machine you can't use a 64-bit for building.
-"
-	read ask_arch
-	case ${ask_arch} in
-		1)	echo "1" > .asked_arch.cfg ;;
-		2)	echo "2" > .asked_arch.cfg ;;
-		*)	echo "Unkown choice '${ask_arch}' !" ; sleep 3 ; : ;;
-	esac
-done
-
 case `cat .asked_arch.cfg` in
 	1) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-32bit/generic_32/stage3-latest.tar.xz ; export portage_make_dot_conf=/usr/share/portage/make.conf.i686 ; export genkernel=/usr/src/linux/arch/x86/configs/aufs32_defconfig ; export lnx=linux32 ;;
 	2) export url_of_stage_file=http://build.funtoo.org/funtoo-current/x86-64bit/generic_64/stage3-latest.tar.xz ; export portage_make_dot_conf=/usr/share/portage/make.conf.x86_64 ; export genkernel=/usr/src/linux/arch/x86/configs/aufs64_defconfig ; export lnx=linux64 ;;
@@ -126,18 +106,18 @@ if [ ! -e './stamps/04' ]; then
 		chroot rootfs ${lnx} ln -s ${portage_make_dot_conf} /etc/portage/make.conf.example
 		chroot rootfs ${lnx} chmod 7777 /tmp
 		touch './stamps/04'
-		chroot rootfs ${lnx} emerge -uvDN --ask n --with-bdeps=y @world
-		chroot rootfs ${lnx} emerge aufs-sources --autounmask-write --verbose --ask n
+		chroot rootfs ${lnx} emerge -uvDN --ask n --with-bdeps=y @world >/dev/null
+		chroot rootfs ${lnx} emerge aufs-sources --autounmask-write --verbose --ask n >/dev/null
 		cp -raf stage/* .asked_arch.cfg rootfs
 		cp -raf stage/usr/src/linux/* rootfs/usr/src/linux
-		chroot rootfs ${lnx} genkernel --oldconfig --no-mountboot --no-symlink --install --no-splash --unionfs --kernel-config=${genkernel} kernel
-		chroot rootfs ${lnx} make mrproper -C /usr/src/linux
-		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta lightdm-gtk-greeter --autounmask-write --verbose --ask n
+		chroot rootfs ${lnx} genkernel --oldconfig --no-mountboot --no-symlink --install --no-splash --unionfs --kernel-config=${genkernel} kernel >/dev/null
+		chroot rootfs ${lnx} make mrproper -C /usr/src/linux >/dev/null
+		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta lightdm-gtk-greeter --autounmask-write --verbose --ask n >/dev/null
 		chroot rootfs ${lnx} etc-update <<!
 -5
 !
 		#	Now we must repeat above command for some reasons to 'autounmask' masked packages!
-		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta lightdm-gtk-greeter --autounmask-write --verbose --ask n
+		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta lightdm-gtk-greeter --autounmask-write --verbose --ask n >/dev/null
 	); then
 		die "Can't emerge default packages!" '04'
 	fi
@@ -146,11 +126,11 @@ fi
 if [ ! -e './stamps/05' ]; then
 	if ! (
 		touch './stamps/05'
-		chroot rootfs ${lnx} rc-update add consolekit default
-		chroot rootfs ${lnx} rc-update add dhcpcd default
+		chroot rootfs ${lnx} rc-update add consolekit default >/dev/null
+		chroot rootfs ${lnx} rc-update add dhcpcd default >/dev/null
 		echo "DISPLAYMANAGER='lightdm'" > rootfs/etc/conf.d/xdm
-		chroot rootfs ${lnx} rc-update add xdm default
-		chroot rootfs ${lnx} rc-update add dbus default
+		chroot rootfs ${lnx} rc-update add xdm default >/dev/null
+		chroot rootfs ${lnx} rc-update add dbus default >/dev/null
 	); then
 		die "Can't setup rc-update!" '05'
 	fi
@@ -176,16 +156,9 @@ fi
 
 rm -rf rootfs/usr/portage/distfiles/*
 
-if chroot rootfs ${lnx} /tmp/linux-live/build; then
+if chroot rootfs ${lnx} /tmp/linux-live/build >/dev/null; then
 	umount_
 	mv -f rootfs/*.iso out
-	clear
-	echo "
-ALL GOOD!
-FIND IMAGES IN `pwd`/out DIR :)
----
-The 'root' password is 'toor', remember it!
-"
 	ls out | sort
 else
 	die "Can't create final images!"
@@ -195,7 +168,7 @@ fi
 case ${1} in
 	build)	echo "1" > .asked_arch.cfg; build; ./build.sh clean; echo "2" > .asked_arch.cfg; build; ./build.sh clean ;;
 	clean)	rm -rf rootfs stage.tar.xz stamps .asked_arch.cfg ;;
-	*)	clear ; echo -e "\nOnly use:\n`basename $0` <build|clean|chroot|clean-variable>\n" ;;
+	*)	clear ; echo -e "\nOnly use:\n`basename $0` build|clean\n" ;;
 esac
 
 exit 0
