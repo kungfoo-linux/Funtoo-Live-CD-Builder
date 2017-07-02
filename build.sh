@@ -11,7 +11,7 @@ die() {
 	if [ "$2" != "avoid_loop" ]; then
 		umount_
 	fi
-	exit 1
+	exit $?
 }
 
 mount_() {
@@ -194,11 +194,11 @@ fi
 }
 
 case ${1} in
-	build)	build ;;
+	build)	echo "1" > .asked_arch.cfg; build; ./build.sh clean; echo "2" > .asked_arch.cfg; build; ./build.sh clean ;;
 	chroot)	mount_ && compare_ && chroot rootfs ${2} && umount_ ;;
 	clean)	rm -rf rootfs out stage.tar.xz stamps .asked_arch.cfg ;;
 	clean-variable)	rm -rf .asked_arch.cfg ;;
 	*)	clear ; echo -e "\nOnly use:\n`basename $0` <build|clean|chroot|clean-variable>\n" ;;
 esac
 
-exit
+exit 0
