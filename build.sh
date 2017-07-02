@@ -107,17 +107,17 @@ if [ ! -e './stamps/04' ]; then
 		chroot rootfs ${lnx} chmod 7777 /tmp
 		touch './stamps/04'
 		chroot rootfs ${lnx} emerge -uvDN --ask n --with-bdeps=y @world >/dev/null
-		chroot rootfs ${lnx} emerge aufs-sources --autounmask-write --verbose --ask n >/dev/null
+		chroot rootfs ${lnx} emerge aufs-sources --autounmask-write --ask n
 		cp -raf stage/* .asked_arch.cfg rootfs
 		cp -raf stage/usr/src/linux/* rootfs/usr/src/linux
-		chroot rootfs ${lnx} genkernel --oldconfig --no-mountboot --no-symlink --install --no-splash --unionfs --kernel-config=${genkernel} kernel >/dev/null
-		chroot rootfs ${lnx} make mrproper -C /usr/src/linux >/dev/null
-		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta lightdm-gtk-greeter --autounmask-write --verbose --ask n >/dev/null
+		chroot rootfs ${lnx} genkernel --oldconfig --no-mountboot --no-symlink --install --no-splash --unionfs --kernel-config=${genkernel} kernel
+		chroot rootfs ${lnx} make mrproper -C /usr/src/linux
+		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta lightdm-gtk-greeter --autounmask-write --ask n
 		chroot rootfs ${lnx} etc-update <<!
 -5
 !
 		#	Now we must repeat above command for some reasons to 'autounmask' masked packages!
-		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta lightdm-gtk-greeter --autounmask-write --verbose --ask n >/dev/null
+		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta lightdm-gtk-greeter --autounmask-write --ask n
 	); then
 		die "Can't emerge default packages!" '04'
 	fi
@@ -126,11 +126,11 @@ fi
 if [ ! -e './stamps/05' ]; then
 	if ! (
 		touch './stamps/05'
-		chroot rootfs ${lnx} rc-update add consolekit default >/dev/null
-		chroot rootfs ${lnx} rc-update add dhcpcd default >/dev/null
+		chroot rootfs ${lnx} rc-update add consolekit default
+		chroot rootfs ${lnx} rc-update add dhcpcd default
 		echo "DISPLAYMANAGER='lightdm'" > rootfs/etc/conf.d/xdm
-		chroot rootfs ${lnx} rc-update add xdm default >/dev/null
-		chroot rootfs ${lnx} rc-update add dbus default >/dev/null
+		chroot rootfs ${lnx} rc-update add xdm default
+		chroot rootfs ${lnx} rc-update add dbus default
 	); then
 		die "Can't setup rc-update!" '05'
 	fi
@@ -156,7 +156,7 @@ fi
 
 rm -rf rootfs/usr/portage/distfiles/*
 
-if chroot rootfs ${lnx} /tmp/linux-live/build >/dev/null; then
+if chroot rootfs ${lnx} /tmp/linux-live/build; then
 	umount_
 	mv -f rootfs/*.iso out
 	ls out | sort
