@@ -169,7 +169,6 @@ toor
 	#while ! chroot rootfs passwd root; do
 	#	:
 	#done
-		echo "The 'root' password is 'toor', remember it!" > out/password_to_root.txt
 	); then
 		die "Can't setup password for root!" '06'
 	fi
@@ -195,9 +194,7 @@ fi
 
 case ${1} in
 	build)	echo "1" > .asked_arch.cfg; build; ./build.sh clean; echo "2" > .asked_arch.cfg; build; ./build.sh clean ;;
-	chroot)	mount_ && compare_ && chroot rootfs ${2} && umount_ ;;
 	clean)	rm -rf rootfs out stage.tar.xz stamps .asked_arch.cfg ;;
-	clean-variable)	rm -rf .asked_arch.cfg ;;
 	*)	clear ; echo -e "\nOnly use:\n`basename $0` <build|clean|chroot|clean-variable>\n" ;;
 esac
 
