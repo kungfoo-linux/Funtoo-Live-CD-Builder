@@ -5,8 +5,8 @@ compiler:
 os:
 - linux
 before_install:
-- sudo apt -qq update
-- sudo apt install -y lib32z-dev build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev
+- sudo apt -qq update >/dev/null
+- sudo apt-get install -y lib32z-dev build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev >/dev/null
 before_script:
 - sudo chmod 7777 ./build.sh
 script:
