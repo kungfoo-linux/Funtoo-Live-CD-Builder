@@ -106,7 +106,7 @@ if [ ! -e './stamps/04' ]; then
 		chroot rootfs ${lnx} ln -s ${portage_make_dot_conf} /etc/portage/make.conf.example
 		chroot rootfs ${lnx} chmod 7777 /tmp
 		touch './stamps/04'
-		chroot rootfs ${lnx} emerge -uvDN --ask n --with-bdeps=y @world >/dev/null
+		chroot rootfs ${lnx} emerge -uDN --ask n --with-bdeps=y @world
 		chroot rootfs ${lnx} emerge aufs-sources --autounmask-write --ask n
 		cp -raf stage/* .asked_arch.cfg rootfs
 		cp -raf stage/usr/src/linux/* rootfs/usr/src/linux
