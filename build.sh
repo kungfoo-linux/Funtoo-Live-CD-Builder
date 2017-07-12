@@ -11,7 +11,7 @@ die() {
 	if [ ! -z "$2" ]; then
 		rm -rf stamps/$2
 	fi
-	exit 1
+	exit $?
 }
 
 mount_() {
