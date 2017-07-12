@@ -5,11 +5,11 @@
 
 die() {
 	echo -e "\nERROR: $1\n"
-	if [ ! -z "$2" ]; then
-		rm -rf stamps/$2
-	fi
 	if [ "$2" != "avoid_loop" ]; then
 		umount_
+	fi
+	if [ ! -z "$2" ]; then
+		rm -rf stamps/$2
 	fi
 	exit 1
 }
