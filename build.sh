@@ -19,20 +19,20 @@ mount_() {
 	mkdir -p rootfs/proc
 	mkdir -p rootfs/sys
 	if ! mountpoint -q "`pwd`/rootfs/dev"; then
-		mount --bind /dev rootfs/dev || die "Can't bind /dev to `pwd`/rootfs/dev!"
+		mount --bind /dev rootfs/dev || die "Can't bind /dev to `pwd`/rootfs/dev!" 'avoid_loop'
 	fi
 	if ! mountpoint -q "`pwd`/rootfs/sys"; then
-		mount --bind /sys rootfs/sys || die "Can't bind /sys to `pwd`/rootfs/sys!"
+		mount --bind /sys rootfs/sys || die "Can't bind /sys to `pwd`/rootfs/sys!" 'avoid_loop'
 	fi
 	if ! mountpoint -q "`pwd`/rootfs/proc"; then
-		mount --bind /proc rootfs/proc || die "Can't bind /proc to `pwd`/rootfs/proc!"
+		mount --bind /proc rootfs/proc || die "Can't bind /proc to `pwd`/rootfs/proc!" 'avoid_loop'
 	fi
 }
 
 umount_() {
-	umount -f rootfs/dev || die "Can't unbind /dev from `pwd`/rootfs/dev!" 'avoid_loop'
-	umount -f rootfs/sys || die "Can't unbind /sys from `pwd`/rootfs/sys!" 'avoid_loop'
-	umount -f rootfs/proc || die "Can't unbind /proc from `pwd`/rootfs/proc!" 'avoid_loop'
+	umount -f rootfs/dev || die "Can't unbind /dev from `pwd`/rootfs/dev!" '${1}'
+	umount -f rootfs/sys || die "Can't unbind /sys from `pwd`/rootfs/sys!" '${1}'
+	umount -f rootfs/proc || die "Can't unbind /proc from `pwd`/rootfs/proc!" '${1}'
 }
 
 compare_() {
