@@ -5,13 +5,11 @@
 
 die() {
 	echo -e "\nERROR: $1\n"
-	if [ "$2" != "avoid_loop" ]; then
-		umount_
-	fi
 	if [ ! -z "$2" ]; then
-		rm -rf stamps/$2
+		rm -rf stamps/${2}
 	fi
-	exit $?
+	umount_
+	exit ${?}
 }
 
 mount_() {
@@ -19,25 +17,34 @@ mount_() {
 	mkdir -p rootfs/proc
 	mkdir -p rootfs/sys
 	if ! mountpoint -q "`pwd`/rootfs/dev"; then
-		mount --bind /dev rootfs/dev || die "Can't bind /dev to `pwd`/rootfs/dev!" 'avoid_loop'
+		mount --bind /dev rootfs/dev || die "Can't bind /dev to `pwd`/rootfs/dev!"
 	fi
 	if ! mountpoint -q "`pwd`/rootfs/sys"; then
-		mount --bind /sys rootfs/sys || die "Can't bind /sys to `pwd`/rootfs/sys!" 'avoid_loop'
+		mount --bind /sys rootfs/sys || die "Can't bind /sys to `pwd`/rootfs/sys!"
 	fi
 	if ! mountpoint -q "`pwd`/rootfs/proc"; then
-		mount --bind /proc rootfs/proc || die "Can't bind /proc to `pwd`/rootfs/proc!" 'avoid_loop'
+		mount --bind /proc rootfs/proc || die "Can't bind /proc to `pwd`/rootfs/proc!"
 	fi
 }
 
 umount_() {
-	umount -f rootfs/dev || die "Can't unbind /dev from `pwd`/rootfs/dev!" '${1}'
-	umount -f rootfs/sys || die "Can't unbind /sys from `pwd`/rootfs/sys!" '${1}'
-	umount -f rootfs/proc || die "Can't unbind /proc from `pwd`/rootfs/proc!" '${1}'
+	if ! umount -f rootfs/dev; then
+		echo "Can't unbind /dev from `pwd`/rootfs/dev!"
+		return ${?}
+	fi
+	if ! umount -f rootfs/sys; then
+		echo "Can't unbind /sys from `pwd`/rootfs/sys!"
+		return ${?}
+	fi
+	if ! umount -f rootfs/proc; then
+		echo "Can't unbind /proc from `pwd`/rootfs/proc!"
+		return ${?}
+	fi
 }
 
 compare_() {
 	if ! diff `readlink -f /etc/resolv.conf` rootfs/etc/resolv.conf >/dev/null; then
-		cp -raf `readlink -f /etc/resolv.conf` rootfs/etc
+		cp -raf `readlink -f /etc/resolv.conf` rootfs/etc/resolv.conf
 	fi
 }
 
@@ -74,8 +81,9 @@ mkdir -p rootfs
 
 if [ ! -e './stamps/00' ]; then
 	touch './stamps/00'
-	if [ -e stage.tar.xz ] && [ ! -d rootfs/* ]; then
+	if [ ! -e stage.tar.xz ] && [ ! -d rootfs/* ]; then
 	(
+		wget --no-check-cert -c ${url_of_stage_file} -O stage.tar.xz >/dev/null
 		tar -xf stage.tar.xz -C rootfs
 	) || die "Can't extract ${url_of_stage_file} to `pwd`/rootfs" '00'
 	else
@@ -92,7 +100,17 @@ compare_
 if [ ! -e './stamps/01' ]; then
 	if ! (
 		touch './stamps/01'
+		rm -rf rootfs/boot/{kernel-*,initramfs-*,System.map-*} rootfs/lib/modules/* rootfs/usr/src/linux*
+		chroot rootfs ${lnx} ego sync
 		chroot rootfs ${lnx} emerge --sync
+		chroot rootfs ${lnx} emerge -uvDN --ask n --with-bdeps=y @world
+		chroot rootfs ${lnx} rm -rf /etc/motd
+		chroot rootfs ${lnx} rm -rf /etc/portage/make.conf*
+		cp -raf stage/* .asked_arch.cfg rootfs
+		cp -raf stage/usr/src/linux/* rootfs/usr/src/linux
+		chroot rootfs ${lnx} ln -s ${portage_make_dot_conf} /etc/portage/make.conf
+		chroot rootfs ${lnx} ln -s ${portage_make_dot_conf} /etc/portage/make.conf.example
+		chroot rootfs ${lnx} chmod 7777 /tmp
 	); then
 		die "Can't sync the portage" '01'
 	fi
@@ -119,24 +137,13 @@ fi
 
 if [ ! -e './stamps/04' ]; then
 	if ! (
-		rm -rf rootfs/boot/{kernel-*,initramfs-*,System.map-*} rootfs/lib/modules/* rootfs/usr/src/linux*
-		chroot rootfs ${lnx} rm -rf /etc/motd
-		chroot rootfs ${lnx} rm -rf /etc/portage/make.conf*
-		chroot rootfs ${lnx} ln -s ${portage_make_dot_conf} /etc/portage/make.conf
-		chroot rootfs ${lnx} ln -s ${portage_make_dot_conf} /etc/portage/make.conf.example
-		chroot rootfs ${lnx} chmod 7777 /tmp
 		touch './stamps/04'
-		chroot rootfs ${lnx} emerge -uvDN --ask n --with-bdeps=y @world
 		chroot rootfs ${lnx} emerge aufs-sources --autounmask-write --verbose --ask n
-		cp -raf stage/* .asked_arch.cfg rootfs
-		cp -raf stage/usr/src/linux/* rootfs/usr/src/linux
 		chroot rootfs ${lnx} genkernel --oldconfig --no-mountboot --no-symlink --install --no-splash --unionfs --kernel-config=${genkernel} kernel
 		chroot rootfs ${lnx} make mrproper -C /usr/src/linux
-		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta lightdm-gtk-greeter --autounmask-write --verbose --ask n
 		chroot rootfs ${lnx} etc-update <<!
 -5
 !
-		#	Now we must repeat above command for some reasons to 'autounmask' masked packages!
 		chroot rootfs ${lnx} emerge boot-update wicd squashfs-tools firefox-bin geany porthole xorg-x11 dialog cdrtools lightdm genkernel xfce4-meta lightdm-gtk-greeter --autounmask-write --verbose --ask n
 	); then
 		die "Can't emerge default packages!" '04'
