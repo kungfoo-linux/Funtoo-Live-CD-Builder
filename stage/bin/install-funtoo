@@ -78,8 +78,6 @@ Do you want to continue installing without one? " 6 60
  if [ "$?" = "1" ]; then
   dialog --title "ABORTING INSTALLATION" --msgbox "Create a swap partition with Linux fdisk, and then try this again." 6 40
   exit 1
- else
-  exit 0
  fi
 else # there is at least one swap partition:
  echo > $TMP/swapmsg 
@@ -320,8 +318,8 @@ Would you like to reboot in to new system?
 read choice
 case $choice in
 Y|y|Yes|yes)	reboot ;;
-N|n|No|no)		exit ;;
-*)				echo "Bad option"; sleep 2; finish ;;
+N|n|No|no)	exit ;;
+*)	echo "Bad option"; sleep 2; finish ;;
 esac
 }
 
